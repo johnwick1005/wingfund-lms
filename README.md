@@ -1,25 +1,111 @@
-# CODING AGENTS: READ THIS FIRST
+# WingFund LMS
 
-This is a **handoff bundle** from Claude Design (claude.ai/design).
+Microfinance loan management system — editorial fintech aesthetic, built for Chennai.
 
-A user mocked up designs in HTML/CSS/JS using an AI design tool, then exported this bundle so a coding agent can implement the designs for real.
+## Stack
 
-## What you should do — IMPORTANT
+| Layer    | Tech                          |
+|----------|-------------------------------|
+| Frontend | Vite + React 18               |
+| Backend  | Node.js + Express             |
+| Fonts    | Fraunces · Plus Jakarta Sans · JetBrains Mono |
 
-**Read the chat transcripts first.** There are 1 chat transcript(s) in `chats/`. The transcripts show the full back-and-forth between the user and the design assistant — they tell you **what the user actually wants** and **where they landed** after iterating. Don't skip them. The final HTML files are the output, but the chat is where the intent lives.
+---
 
-**Read `project/WingFund LMS.html` in full.** The user had this file open when they triggered the handoff, so it's almost certainly the primary design they want built. Read it top to bottom — don't skim. Then **follow its imports**: open every file it pulls in (shared components, CSS, scripts) so you understand how the pieces fit together before you start implementing.
+## Quick start
 
-**If anything is ambiguous, ask the user to confirm before you start implementing.** It's much cheaper to clarify scope up front than to build the wrong thing.
+### 1. Clone the repo
 
-## About the design files
+```bash
+git clone <your-repo-url>
+cd wingfund-lms
+```
 
-The design medium is **HTML/CSS/JS** — these are prototypes, not production code. Your job is to **recreate them pixel-perfectly** in whatever technology makes sense for the target codebase (React, Vue, native, whatever fits). Match the visual output; don't copy the prototype's internal structure unless it happens to fit.
+### 2. Install all dependencies
 
-**Don't render these files in a browser or take screenshots unless the user asks you to.** Everything you need — dimensions, colors, layout rules — is spelled out in the source. Read the HTML and CSS directly; a screenshot won't tell you anything they don't.
+```bash
+npm run install:all
+```
 
-## Bundle contents
+This installs packages for both `frontend/` and `backend/` in one shot.
 
-- `README.md` — this file
-- `chats/` — conversation transcripts (read these!)
-- `project/` — the `WingFund` project files (HTML prototypes, assets, components)
+### 3. Start both servers
+
+```bash
+npm run dev
+```
+
+| Service  | URL                        |
+|----------|----------------------------|
+| Frontend | http://localhost:5173      |
+| API      | http://localhost:3001      |
+
+The frontend dev server automatically proxies `/api/*` requests to the backend, so no CORS config needed during development.
+
+---
+
+## Project structure
+
+```
+wingfund-lms/
+├── package.json          # root — runs both servers via concurrently
+│
+├── frontend/             # Vite + React
+│   ├── src/
+│   │   ├── api/          # fetch wrapper for all backend routes
+│   │   ├── context/      # TweaksContext — theme/density/locale state
+│   │   ├── utils/        # fmtINR (Indian number formatting), initials
+│   │   ├── components/   # Sidebar, TopBar, CustomerPanel, LoanModal, TweaksPanel
+│   │   ├── screens/      # Dashboard, Customers, Loans, Collections, Reports
+│   │   ├── App.jsx       # layout + navigation state
+│   │   └── index.css     # full design system (CSS variables, no framework)
+│   └── vite.config.js    # /api proxy → localhost:3001
+│
+└── backend/              # Express REST API
+    ├── data/index.js     # seed data (swap for a real DB later)
+    ├── routes/           # customers, loans, collections, reports, dashboard
+    └── server.js         # CORS, JSON body parser, route mounts
+```
+
+---
+
+## Available API routes
+
+```
+GET  /api/health
+GET  /api/dashboard/stats
+GET  /api/dashboard/disbursals
+
+GET  /api/customers            ?status=active|overdue|blocked|new  &q=search
+GET  /api/customers/:id
+
+GET  /api/loans                ?status=active|pending|closed       &q=search
+GET  /api/loans/:id
+POST /api/loans
+
+GET  /api/collections/due
+GET  /api/collections/done
+GET  /api/collections/summary
+
+GET  /api/reports/summary
+```
+
+---
+
+## Production build
+
+```bash
+npm run build          # builds frontend/dist/
+```
+
+Serve `frontend/dist/` with any static host (Vercel, Netlify, nginx).
+Run `backend/server.js` on any Node.js host (Railway, Render, Fly.io).
+
+---
+
+## Next steps to scale
+
+- Replace `backend/data/index.js` with a real database (PostgreSQL recommended)
+- Add auth middleware to Express routes (JWT or sessions)
+- Wire `frontend/src/api/index.js` calls into screen components (currently screens use local data for fast rendering)
+- Add `.env` for `PORT`, `DATABASE_URL`, `JWT_SECRET`
