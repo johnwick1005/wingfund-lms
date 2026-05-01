@@ -1,0 +1,2828 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>WingFund — Loan Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Hind+Madurai:wght@400;500;600&family=Caveat:wght@400;500&display=swap" rel="stylesheet">
+<script>
+/* Tweak defaults — host can rewrite this block on disk via __edit_mode_set_keys */
+window.__TWEAKS = /*EDITMODE-BEGIN*/{
+  "primaryColor": "#8C5A82",
+  "accentColor": "#C9A961",
+  "density": "comfy",
+  "showTamil": true,
+  "customerView": "panel",
+  "denseDashboard": false
+}/*EDITMODE-END*/;
+</script>
+<style>
+:root{
+  --primary:#8C5A82;
+  --primary-deep:#5E3A57;
+  --primary-tint:#A77A9D;
+  --primary-soft:#F1E7EE;
+  --accent:#C9A961;
+  --accent-soft:#F5EFE0;
+  --bg:#FFFFFF;
+  --surface:#FAF7F1;
+  --surface-2:#F2EBD9;
+  --text:#0A0A0A;
+  --muted:#6B6B6B;
+  --line:#ECE6D7;
+  --line-strong:#D9D0BA;
+  --success:#2D5F3F;
+  --success-soft:#E2ECE5;
+  --warning:#C77D2C;
+  --warning-soft:#F5E6D5;
+  --danger:#8C3636;
+  --danger-soft:#F4E0E0;
+
+  --pad: 24px;
+  --pad-tight: 16px;
+  --row-pad: 14px;
+  --radius: 14px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 0 rgba(26,26,26,.04);
+  --shadow-md: 0 8px 24px -12px rgba(15,76,58,.18), 0 2px 4px rgba(15,76,58,.05);
+
+  --font-display: "Fraunces", "Times New Roman", serif;
+  --font-body: "Plus Jakarta Sans", "Hind Madurai", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-tamil: "Hind Madurai", "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-hand: "Caveat", cursive;
+
+  --horizon: linear-gradient(90deg, transparent, var(--accent) 8%, var(--accent) 92%, transparent);
+}
+
+[data-density="compact"]{ --pad: 16px; --row-pad: 9px; --pad-tight: 12px; }
+[data-density="comfy"]{ --pad: 32px; --row-pad: 18px; --pad-tight: 20px; }
+
+*{ box-sizing: border-box; }
+html, body{ margin:0; padding:0; }
+body{
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+button{ font-family: inherit; cursor: pointer; }
+input, select, textarea{ font-family: inherit; }
+
+/* ─────────────────────────────────────────── Layout shell */
+.app{
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* ─────────────────────────────────────────── Sidebar */
+.sb{
+  background: var(--primary);
+  color: #F1E7EE;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--primary-deep);
+}
+.sb-brand{
+  padding: 22px 22px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  position: relative;
+}
+.sb-brand::after{
+  content:"";
+  position:absolute;
+  left:22px; right:22px; bottom: -1px;
+  height:1px;
+  background: var(--accent);
+  opacity: .5;
+}
+.sb-mark{
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  color: var(--accent);
+}
+.sb-mark svg{ width: 40px; height: 40px; display:block; }
+.sb-brand-name{
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  color: #FAF7F2;
+}
+.sb-brand-tag{
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  margin-top: 4px;
+  font-weight: 500;
+  font-family: var(--font-tamil);
+}
+
+.sb-section{
+  padding: 22px 14px 6px;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: rgba(238,233,220,.45);
+  font-weight: 600;
+}
+.sb-nav{
+  display: flex; flex-direction: column;
+  padding: 0 8px;
+  gap: 1px;
+}
+.sb-link{
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: rgba(238,233,220,.78);
+  cursor: pointer;
+  user-select: none;
+  transition: background .12s ease, color .12s ease;
+}
+.sb-link:hover{ background: rgba(255,255,255,.08); color:#FFFFFF; }
+.sb-link.active{
+  background: rgba(255,255,255,.1);
+  color: #FFFFFF;
+}
+.sb-link.active::before{
+  content:"";
+  position:absolute;
+  left: -8px;
+  top: 8px; bottom: 8px;
+  width: 3px;
+  background: var(--accent);
+  border-radius: 0 2px 2px 0;
+}
+.sb-link svg{ width: 17px; height: 17px; flex: none; opacity:.85; }
+
+.sb-spacer{ flex: 1; }
+
+.sb-user{
+  margin: 14px;
+  padding: 12px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sb-avatar{
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: grid; place-items: center;
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--primary-deep);
+  font-size: 14px;
+}
+.sb-user-name{ font-size: 13px; font-weight: 600; color: #FFFFFF; line-height:1.1; }
+.sb-user-role{ font-size: 11px; color: rgba(241,231,238,.7); margin-top: 3px; }
+.sb-user-menu{
+  margin-left: auto;
+  width: 22px; height: 22px;
+  display:grid; place-items:center;
+  color: rgba(238,233,220,.45);
+}
+
+/* ─────────────────────────────────────────── Main */
+.main{
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--bg);
+}
+
+.topbar{
+  height: 60px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(250,247,242,.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--pad);
+  gap: 16px;
+  position: sticky; top: 0; z-index: 20;
+}
+.crumbs{
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.crumbs strong{ color: var(--text); font-weight: 600; }
+.crumbs .sep{ color: var(--line-strong); }
+
+.tb-search{
+  flex: 1;
+  max-width: 420px;
+  position: relative;
+  display: flex; align-items: center;
+}
+.tb-search svg{ position:absolute; left: 12px; width:15px; height:15px; color: var(--muted); }
+.tb-search input{
+  width: 100%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 10px;
+  height: 36px;
+  padding: 0 12px 0 36px;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color .12s, box-shadow .12s;
+}
+.tb-search input:focus{
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(15,76,58,.08);
+  background: #fff;
+}
+.tb-search kbd{
+  position:absolute; right: 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: #fff;
+  border: 1px solid var(--line);
+  padding: 2px 5px;
+  border-radius: 4px;
+  color: var(--muted);
+}
+
+.tb-spacer{ flex:1; }
+
+.tb-icon{
+  width: 36px; height: 36px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 8px;
+  display: grid; place-items: center;
+  color: var(--text);
+  position: relative;
+}
+.tb-icon:hover{ background: #fff; border-color: var(--line-strong); }
+.tb-icon .dot{
+  position:absolute; top:8px; right: 8px;
+  width: 7px; height: 7px;
+  background: var(--accent);
+  border: 1.5px solid var(--surface);
+  border-radius: 50%;
+}
+
+.tb-lang{
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.tb-lang .ta{ color: var(--accent); font-weight: 700; }
+
+.tb-user{
+  display:flex; align-items:center; gap:10px;
+  padding-left: 12px;
+  border-left: 1px solid var(--line);
+  margin-left: 4px;
+}
+.tb-user-name{ font-size: 13px; font-weight: 600; }
+.tb-user-meta{ font-size: 11px; color: var(--muted); margin-top:2px; }
+.tb-avatar{
+  width:34px; height:34px; border-radius: 50%;
+  background: var(--primary);
+  color: #FFFFFF;
+  font-family: var(--font-display); font-weight: 500;
+  display:grid; place-items:center;
+  font-size: 13px;
+}
+
+/* ─────────────────────────────────────────── Page */
+.page{
+  flex:1;
+  overflow: auto;
+  padding: 28px var(--pad) 60px;
+  position: relative;
+}
+.page-header{
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  gap: 24px;
+  padding-top: 26px;
+  position: relative;
+}
+.page-header::before{
+  content:"";
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 3px;
+  background: var(--primary);
+}
+.page-header::after{
+  content:"";
+  position: absolute;
+  left: 0; right: 0; top: 6px;
+  height: 1px;
+  background: var(--accent);
+}
+.page-title{
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 38px;
+  letter-spacing: -0.025em;
+  line-height: 1.02;
+  margin: 0;
+  font-variation-settings: "opsz" 144, "SOFT" 50;
+}
+.page-title em{
+  font-style: italic;
+  font-weight: 400;
+  color: var(--primary);
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+}
+.page-sub{
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 6px;
+}
+.page-sub .ta{ color: var(--primary); font-weight: 500; font-family: var(--font-tamil); }
+
+.page-actions{ display:flex; gap: 10px; }
+
+/* Buttons */
+.btn{
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.btn svg{ width: 14px; height: 14px; }
+.btn-primary{
+  background: var(--primary);
+  color: #FFFFFF;
+  border-color: var(--primary);
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,.18), 0 1px 2px rgba(94,58,87,.2);
+}
+.btn-primary:hover{ background: var(--primary-tint); }
+.btn-primary .accent{
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+}
+.btn-secondary{
+  background: transparent;
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.btn-secondary:hover{ background: var(--primary-soft); }
+.btn-ghost{
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--line);
+}
+.btn-ghost:hover{ background: #fff; border-color: var(--line-strong); }
+.btn-sm{ height: 30px; padding: 0 10px; font-size: 12px; }
+
+/* Cards */
+.card{
+  background: #FFFDF8;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: var(--pad);
+  position: relative;
+}
+.card-cream{ background: var(--surface); }
+.card-title{
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.card-h{
+  display:flex; align-items:center; justify-content: space-between;
+  margin-bottom: 18px;
+}
+.card-eyebrow{
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* KPI */
+.kpi-grid{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.kpi{
+  background: #FFFDF8;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px 22px;
+  position: relative;
+  overflow: hidden;
+}
+.kpi-label{
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+.kpi-value{
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin: 8px 0 6px;
+  line-height: 1.05;
+  color: var(--text);
+}
+.kpi-value .unit{ font-size: 18px; color: var(--muted); margin-right: 2px; font-weight: 400;}
+.kpi-rule{
+  width: 28px; height: 2px;
+  background: var(--accent);
+  margin-bottom: 10px;
+}
+.kpi-trend{
+  display:flex; align-items:center; gap:6px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+.kpi-trend.up{ color: var(--success); }
+.kpi-trend.down{ color: var(--danger); }
+.kpi-trend .lbl{ color: var(--muted); font-family: var(--font-body); }
+.kpi-spark{
+  position:absolute; right: 14px; top: 18px;
+  opacity: .6;
+}
+
+/* Three-col layout for dashboard */
+.dash-grid{
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.dash-row{
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 16px;
+}
+
+/* Aging bars */
+.aging{ display:flex; flex-direction:column; gap: 14px; }
+.aging-row{ display: grid; grid-template-columns: 110px 1fr 90px; align-items:center; gap: 14px; }
+.aging-lbl{ font-size: 12.5px; color: var(--text); font-weight: 500; }
+.aging-lbl .sub{ display:block; color: var(--muted); font-size: 10.5px; font-weight: 500; letter-spacing: .04em; margin-top:2px;}
+.aging-track{
+  height: 10px;
+  background: var(--surface);
+  border-radius: 6px;
+  overflow:hidden;
+  position: relative;
+}
+.aging-fill{
+  height: 100%;
+  background: var(--primary);
+  border-radius: 6px;
+  position: relative;
+}
+.aging-fill::after{
+  content: "";
+  position:absolute; right: 0; top: 0; bottom:0;
+  width: 3px;
+  background: var(--accent);
+}
+.aging-row.warn .aging-fill{ background: #4F6D58; }
+.aging-row.danger .aging-fill{ background: #8B5840; }
+.aging-row.crit .aging-fill{ background: var(--danger); }
+.aging-val{
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-align: right;
+  font-weight: 500;
+}
+
+/* Lists */
+.list{ display: flex; flex-direction: column; }
+.list-row{
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  padding: var(--row-pad) 0;
+  border-bottom: 1px solid var(--line);
+  align-items: center;
+}
+.list-row:last-child{ border-bottom: none; }
+.list-row.overdue{
+  margin: 0 -12px;
+  padding-left: 12px;
+  padding-right: 12px;
+  border-left: 2px solid var(--danger);
+  background: linear-gradient(90deg, rgba(168,57,46,.04), transparent 40%);
+}
+
+.av{
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--primary-deep);
+  display:grid; place-items:center;
+  font-weight: 600;
+  font-size: 13px;
+  font-family: var(--font-display);
+  flex: none;
+  border: 1px solid var(--line);
+}
+.av.gold{ background: var(--accent); color: var(--primary-deep); border-color: var(--accent); }
+.av-lg{ width: 42px; height: 42px; font-size: 15px;}
+
+.li-name{ font-size: 13.5px; font-weight: 600; line-height:1.15; }
+.li-meta{ font-size: 11.5px; color: var(--muted); margin-top: 3px; display:flex; gap: 8px; align-items:center; }
+.li-meta .dot{ width:3px; height:3px; background: var(--line-strong); border-radius:50%;}
+.li-amount{ font-family: var(--font-mono); font-size: 13.5px; font-weight: 600; text-align:right;}
+.li-amount .sub{ display:block; font-size: 10.5px; color: var(--muted); font-weight: 500; margin-top: 2px; letter-spacing:.02em; }
+
+/* Pills */
+.pill{
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 10px;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+.pill::before{
+  content:""; width: 5px; height:5px; border-radius: 50%;
+  background: currentColor;
+}
+.pill.success{ color: var(--success); background: var(--success-soft); }
+.pill.warn{    color: var(--warning); background: var(--warning-soft); }
+.pill.danger{  color: var(--danger);  background: var(--danger-soft);  }
+.pill.gold{    color: var(--accent); background: var(--accent-soft); }
+.pill.neutral{ color: var(--muted); background: var(--surface-2); }
+.pill.solid{ background: var(--primary); color: #FAF7F2; }
+.pill.solid::before{ background: var(--accent); }
+
+/* Today collections card has a date stripe */
+.date-strip{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: var(--primary-soft);
+  border-radius: 10px;
+  margin-bottom: 14px;
+  border: 1px solid #D7E0DA;
+}
+.date-strip .calendar{
+  font-family: var(--font-display);
+  background: #fff;
+  border-radius: 8px;
+  padding: 4px 10px;
+  text-align: center;
+  border: 1px solid #D7E0DA;
+}
+.date-strip .calendar .d{ font-size: 18px; font-weight: 600; line-height: 1; }
+.date-strip .calendar .m{ font-size: 9px; letter-spacing: .14em; color: var(--muted); margin-top: 2px;}
+.date-strip .stat{ font-size: 12px; color: var(--muted); }
+.date-strip .stat strong{ display: block; font-family: var(--font-mono); font-size: 15px; color: var(--text); margin-top: 2px; font-weight: 600;}
+.date-strip .stat.gold strong{ color: var(--accent);}
+.date-strip .stat.green strong{ color: var(--success);}
+
+/* Quick actions strip */
+.qa{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 14px;
+}
+.qa-btn{
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  text-align: left;
+  cursor: pointer;
+  transition: all .12s;
+}
+.qa-btn:hover{ background: #fff; border-color: var(--primary); transform: translateY(-1px); }
+.qa-btn svg{ width: 18px; height: 18px; color: var(--primary); flex: none; }
+.qa-btn .lbl{ font-size: 12.5px; font-weight: 600; line-height: 1.1;}
+.qa-btn .sub{ font-size: 10.5px; color: var(--muted); margin-top: 2px;}
+
+/* Disbursals */
+.disb-row{
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items:center;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--line);
+}
+.disb-row:last-child{ border-bottom: none; }
+.disb-name{ font-size: 13px; font-weight: 600;}
+.disb-meta{ font-size: 11px; color: var(--muted); margin-top: 3px; }
+.disb-amt{ font-family: var(--font-mono); font-size: 14px; font-weight: 600; color: var(--primary); }
+
+/* ─────────────────────────────────────────── Tables */
+.toolbar{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.chips{ display: flex; gap: 6px; }
+.chip{
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--line);
+  background: #FFFDF8;
+  color: var(--text);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.chip:hover{ border-color: var(--line-strong); }
+.chip .ct{
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  background: var(--surface-2);
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: var(--muted);
+}
+.chip.active{
+  background: var(--primary);
+  color: #FAF7F2;
+  border-color: var(--primary);
+}
+.chip.active .ct{ background: rgba(255,255,255,.16); color: #FAF7F2; }
+
+.search-inline{
+  flex:1;
+  position: relative;
+  max-width: 320px;
+}
+.search-inline svg{ position:absolute; left: 10px; top: 8px; width:14px; height:14px; color: var(--muted);}
+.search-inline input{
+  width:100%; height: 32px; border-radius: 8px;
+  border: 1px solid var(--line); background: #FFFDF8;
+  padding: 0 10px 0 32px;
+  font-size: 12.5px; outline: none;
+  color: var(--text);
+}
+.search-inline input:focus{ border-color: var(--primary); background:#fff;}
+
+.tbl-wrap{
+  background: #FFFDF8;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.tbl{
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.tbl thead th{
+  text-align: left;
+  padding: 12px 16px;
+  background: var(--surface);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  color: var(--muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.tbl thead th.right{ text-align: right; }
+.tbl tbody td{
+  padding: var(--row-pad) 16px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+.tbl tbody tr:last-child td{ border-bottom: none; }
+.tbl tbody tr{ transition: background .1s; cursor: pointer; }
+.tbl tbody tr:hover{ background: var(--bg); }
+.tbl tbody tr.overdue{ position: relative; }
+.tbl tbody tr.overdue td:first-child{
+  border-left: 2px solid var(--danger);
+}
+.tbl .cust{
+  display:flex; align-items:center; gap: 12px;
+}
+.tbl .cust .meta{ display:flex; flex-direction:column; gap: 2px;}
+.tbl .cust .meta .id{ font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); letter-spacing: .04em;}
+.tbl .num{ font-family: var(--font-mono); text-align: right; font-weight: 500;}
+.tbl .num.bold{ font-weight: 600; }
+
+/* ─────────────────────────────────────────── Loans */
+.loans-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+.loan-card{
+  background: #FFFDF8;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px 20px;
+  position: relative;
+}
+.loan-card-h{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.loan-id{
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.loan-cust{
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 4px 0 2px;
+}
+.loan-loc{ font-size: 11.5px; color: var(--muted); }
+
+.loan-amt-row{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 14px 0;
+  margin: 8px 0 14px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.loan-amt-lbl{
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+.loan-amt-val{
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 18px;
+  margin-top: 4px;
+  letter-spacing: -0.01em;
+}
+.loan-amt-val.outstanding{ color: var(--primary); }
+
+.loan-progress{
+  height: 4px;
+  background: var(--surface-2);
+  border-radius: 2px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+.loan-progress > span{
+  display:block; height:100%; background: var(--primary);
+  border-radius: 2px;
+}
+
+.loan-foot{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-top: 8px;
+}
+.loan-emi{
+  font-size: 11.5px;
+  color: var(--muted);
+}
+.loan-emi strong{
+  font-family: var(--font-mono);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 13px;
+}
+.loan-due{
+  font-size: 11px;
+  color: var(--muted);
+  text-align: right;
+}
+.loan-due strong{
+  display:block;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 12px;
+  margin-top: 2px;
+}
+.loan-due.warn strong{ color: var(--warning); }
+.loan-due.danger strong{ color: var(--danger); }
+
+/* EMI calculator widget */
+.emi-widget{
+  background: linear-gradient(180deg, var(--primary-deep), var(--primary));
+  color: #F4EFE6;
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+}
+.emi-widget::before{
+  content: "";
+  position: absolute;
+  width: 220px; height: 220px;
+  border: 1px solid rgba(201,169,97,.18);
+  border-radius: 50%;
+  right: -90px; top: -90px;
+}
+.emi-widget::after{
+  content: "";
+  position: absolute;
+  width: 140px; height: 140px;
+  border: 1px solid rgba(201,169,97,.13);
+  border-radius: 50%;
+  right: -50px; top: -50px;
+}
+.emi-eyebrow{
+  font-size: 10px;
+  letter-spacing: .22em;
+  color: var(--accent);
+  font-weight: 600;
+}
+.emi-title{
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  margin: 6px 0 18px;
+  letter-spacing: -0.01em;
+}
+.emi-row{ margin-bottom: 14px; position: relative; z-index: 1;}
+.emi-row label{
+  display:flex; justify-content: space-between;
+  font-size: 11px;
+  color: rgba(244,239,230,.65);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.emi-row label span{ font-family: var(--font-mono); color: var(--accent); letter-spacing: .02em;}
+.emi-row input[type=range]{
+  width:100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: rgba(244,239,230,.16);
+  border-radius: 2px;
+  outline:none;
+}
+.emi-row input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  background: var(--accent);
+  border-radius: 50%;
+  border: 3px solid var(--primary-deep);
+  cursor: pointer;
+}
+.emi-row input[type=range]::-moz-range-thumb{
+  width: 16px; height: 16px;
+  background: var(--accent);
+  border-radius: 50%;
+  border: 3px solid var(--primary-deep);
+  cursor: pointer;
+}
+.emi-result{
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(201,169,97,.25);
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  position: relative; z-index: 1;
+}
+.emi-result .lbl{
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(244,239,230,.55);
+  font-weight: 600;
+}
+.emi-result .val{
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  margin-top: 4px;
+  letter-spacing: -0.01em;
+}
+.emi-result .val .pre{ font-size: 14px; color: var(--accent); margin-right: 1px; }
+.emi-result .val.accent{ color: var(--accent); }
+
+/* Loans layout */
+.loans-layout{
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+}
+@media (max-width: 1280px){
+  .loans-layout{ grid-template-columns: 1fr; }
+  .emi-widget{ order: -1; }
+}
+
+/* ─────────────────────────────────────────── Collections */
+.col-grid{
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.col-card{
+  background: #FFFDF8;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  display: flex; flex-direction: column;
+}
+.col-card-h{
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+  display:flex; justify-content: space-between; align-items: center;
+}
+.col-card-h h3{
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 500;
+  margin: 0;
+  display: flex; align-items: center; gap: 10px;
+}
+.col-count{
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--surface);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+.col-list{ padding: 0 20px; }
+.col-row{
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.col-row:last-child{ border-bottom: none; }
+.col-row .partner{
+  font-size: 10.5px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-top: 2px;
+}
+.mode-pill{
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 5px;
+  letter-spacing: .02em;
+  font-family: var(--font-mono);
+}
+.mode-pill.cash{ background: var(--accent-soft); color: var(--accent);}
+.mode-pill.upi{ background: var(--primary-soft); color: var(--primary);}
+
+.col-totals{
+  margin-top: auto;
+  padding: 16px 20px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+.col-total .lbl{ font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 600;}
+.col-total .val{ font-family: var(--font-mono); font-size: 17px; font-weight: 600; margin-top: 4px; }
+.col-total.due .val{ color: var(--text); }
+.col-total.collected .val{ color: var(--success); }
+.col-total.pending .val{ color: var(--danger); }
+
+/* ─────────────────────────────────────────── Reports */
+.reports-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 16px;
+}
+.report-card{
+  background: #FFFDF8;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  display: flex; flex-direction: column;
+  gap: 16px;
+  min-height: 220px;
+}
+.report-card h3{
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.report-eyebrow{
+  font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--accent); font-weight: 700;
+}
+.report-meta{
+  display: flex; justify-content: space-between;
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: -4px;
+}
+.report-meta .v{ color: var(--text); font-family: var(--font-mono); font-weight: 600;}
+.report-foot{
+  margin-top: auto;
+  display:flex; justify-content: space-between; align-items:center;
+}
+.report-spark{ height: 56px; }
+
+.kv-row{
+  display:flex; justify-content: space-between;
+  font-size: 12.5px; padding: 4px 0;
+}
+.kv-row .v{ font-family: var(--font-mono); font-weight: 600; }
+
+/* Date range filter */
+.date-range{
+  display: flex; gap: 8px; align-items: center;
+  background: var(--surface); border: 1px solid var(--line);
+  height: 36px; padding: 0 14px; border-radius: 8px;
+  font-size: 12.5px; font-weight: 500;
+}
+.date-range strong{ font-family: var(--font-mono); font-weight: 600;}
+
+/* ─────────────────────────────────────────── Footer */
+.foot-mark{
+  position: absolute;
+  bottom: 18px;
+  right: var(--pad);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+  font-weight: 600;
+}
+.foot-mark::before{
+  content: ""; width: 18px; height: 1px; background: var(--accent);
+}
+
+/* ─────────────────────────────────────────── Modal */
+.modal-bg{
+  position: fixed; inset: 0;
+  background: rgba(10,53,40,.45);
+  backdrop-filter: blur(2px);
+  z-index: 100;
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 40px 20px;
+  animation: fade .18s ease;
+}
+.modal-bg.show{ display: flex; }
+@keyframes fade{ from { opacity: 0; } to { opacity: 1; } }
+
+.modal{
+  background: var(--bg);
+  border-radius: 18px;
+  width: 720px;
+  max-width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  box-shadow: 0 30px 60px -20px rgba(10,53,40,.4);
+  display: flex; flex-direction: column;
+  animation: pop .22s cubic-bezier(.2,.9,.3,1);
+}
+@keyframes pop{ from{ transform: translateY(8px) scale(.985); opacity: 0;} to{ transform: none; opacity: 1;}}
+
+.modal-h{
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--line);
+  background: #FFFDF8;
+}
+.modal-h h2{
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.modal-x{
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  display: grid; place-items: center;
+}
+.modal-body{ padding: 24px; overflow: auto; flex: 1;}
+
+.steps{
+  display: flex; gap: 4px;
+  margin-bottom: 24px;
+}
+.step{
+  flex: 1;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.step-bar{
+  height: 3px; background: var(--surface-2);
+  border-radius: 2px;
+}
+.step.active .step-bar{ background: var(--primary); }
+.step.done .step-bar{ background: var(--accent); }
+.step-label{
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: .04em;
+}
+.step.active .step-label{ color: var(--primary); }
+.step-num{
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+.step.active .step-num{ color: var(--primary); font-weight: 600;}
+
+.field-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 16px;
+}
+.field{ display: flex; flex-direction: column; gap: 6px;}
+.field.full{ grid-column: 1 / -1;}
+.field label{
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.field input, .field select, .field textarea{
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 13px;
+  background: #FFFDF8;
+  color: var(--text);
+  outline: none;
+  transition: border-color .12s, box-shadow .12s;
+}
+.field textarea{ height: auto; padding: 10px 12px; resize: vertical; min-height: 80px;}
+.field input:focus, .field select:focus, .field textarea:focus{
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(15,76,58,.08);
+  background: #fff;
+}
+.field .help{ font-size: 11px; color: var(--muted); }
+
+.modal-f{
+  display:flex; justify-content: space-between; align-items: center;
+  padding: 18px 24px;
+  border-top: 1px solid var(--line);
+  background: #FFFDF8;
+}
+
+/* ─────────────────────────────────────────── Customer panel */
+.cust-panel-bg{
+  position: fixed; inset: 0;
+  background: rgba(10,53,40,.35);
+  z-index: 90; display: none;
+}
+.cust-panel-bg.show{ display: block; animation: fade .18s; }
+.cust-panel{
+  position: fixed; right: 0; top: 0; bottom: 0;
+  width: 460px; max-width: 100%;
+  background: var(--bg);
+  border-left: 1px solid var(--line);
+  box-shadow: -20px 0 60px -20px rgba(10,53,40,.3);
+  z-index: 91;
+  transform: translateX(100%);
+  transition: transform .25s cubic-bezier(.2,.9,.3,1);
+  display: flex; flex-direction: column;
+}
+.cust-panel.show{ transform: none; }
+
+.cp-h{
+  padding: 20px 22px 18px;
+  background: linear-gradient(180deg, var(--primary-deep), var(--primary));
+  color: #F4EFE6;
+  position: relative;
+}
+.cp-x{
+  position: absolute; top: 16px; right: 16px;
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.16);
+  color: #F4EFE6;
+  display:grid; place-items:center;
+}
+.cp-id{ font-family: var(--font-mono); font-size: 10.5px; color: var(--accent); letter-spacing: .08em;}
+.cp-name{
+  font-family: var(--font-display);
+  font-size: 26px; font-weight: 500;
+  margin: 6px 0 4px;
+  letter-spacing: -0.01em;
+}
+.cp-loc{ font-size: 12.5px; color: rgba(244,239,230,.7);}
+.cp-pills{ display: flex; gap: 6px; margin-top: 12px;}
+
+.cp-stats{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: #FFFDF8;
+  border-bottom: 1px solid var(--line);
+}
+.cp-stat{
+  padding: 16px 18px;
+  border-right: 1px solid var(--line);
+}
+.cp-stat:last-child{ border-right: none; }
+.cp-stat .lbl{ font-size: 10px; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); font-weight: 600;}
+.cp-stat .val{ font-family: var(--font-display); font-size: 20px; font-weight: 500; margin-top: 4px;}
+
+.cp-body{ flex: 1; overflow: auto; padding: 22px;}
+.cp-section{ margin-bottom: 22px;}
+.cp-section h4{
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0 0 10px;
+}
+.cp-tl{ display:flex; flex-direction: column; gap: 1px;}
+.cp-tl-row{
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.cp-tl-date{
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+}
+.cp-tl-date strong{ display:block; color: var(--text); font-size: 13px; font-weight: 600;}
+
+/* ─────────────────────────────────────────── Tweaks */
+.twk-fab{
+  position: fixed; right: 18px; bottom: 18px;
+  z-index: 200;
+  display: none;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--primary-deep);
+  color: #FAF7F2;
+  border: 1px solid var(--primary);
+  font-weight: 600; font-size: 12px; letter-spacing: .04em;
+  align-items: center; gap: 8px;
+  box-shadow: 0 6px 18px -8px rgba(0,0,0,.4);
+  font-family: var(--font-body);
+}
+.twk-fab .tk-dot{ width: 6px; height: 6px; background: var(--accent); border-radius: 50%;}
+.twk-fab.show{ display: inline-flex; }
+
+.twk-panel{
+  position: fixed; right: 18px; bottom: 60px;
+  width: 280px;
+  background: #FFFDF8;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 18px 40px -14px rgba(0,0,0,.25);
+  z-index: 201;
+  display: none;
+  font-family: var(--font-body);
+  overflow: hidden;
+}
+.twk-panel.show{ display: block; animation: pop .18s ease;}
+.twk-h{
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.twk-h h4{ font-family: var(--font-display); font-size: 14px; font-weight: 500; margin:0; letter-spacing: -0.01em;}
+.twk-h button{
+  width: 24px; height: 24px;
+  background: transparent; border: none;
+  color: var(--muted); font-size: 16px;
+  border-radius: 6px;
+}
+.twk-h button:hover{ background: var(--surface-2);}
+.twk-body{ padding: 12px 14px;}
+.twk-row{
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 0;
+  font-size: 12px;
+  gap: 12px;
+}
+.twk-row label{ font-weight: 500; color: var(--text);}
+.twk-seg{
+  display: inline-flex; gap: 2px;
+  background: var(--surface); padding: 2px;
+  border-radius: 7px;
+  border: 1px solid var(--line);
+}
+.twk-seg button{
+  border: none; background: transparent;
+  font-size: 11px; font-weight: 600;
+  padding: 4px 8px; border-radius: 5px;
+  color: var(--muted); cursor: pointer;
+  font-family: inherit;
+}
+.twk-seg button.on{ background: #fff; color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.06);}
+.twk-color{
+  width: 28px; height: 22px;
+  border-radius: 5px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  padding: 0;
+}
+.twk-toggle{
+  width: 32px; height: 18px;
+  background: var(--line);
+  border-radius: 999px;
+  position: relative;
+  border: none; cursor: pointer;
+  transition: background .15s;
+}
+.twk-toggle::after{
+  content: ""; position: absolute;
+  top: 2px; left: 2px;
+  width: 14px; height: 14px;
+  background: #fff;
+  border-radius: 50%;
+  transition: left .15s;
+  box-shadow: 0 1px 2px rgba(0,0,0,.2);
+}
+.twk-toggle.on{ background: var(--primary); }
+.twk-toggle.on::after{ left: 16px; }
+
+.twk-section-h{
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  margin-top: 8px;
+  padding: 4px 0 6px;
+  border-top: 1px solid var(--line);
+}
+.twk-section-h:first-child{ border-top:none; margin-top: 0;}
+
+/* Page-switch transition */
+.page-screens > section{ display: none; animation: enter .26s ease;}
+.page-screens > section.active{ display: block; }
+@keyframes enter {
+  from { opacity: 0; transform: translateY(6px);}
+  to { opacity: 1; transform: none;}
+}
+
+/* Stagger */
+.stagger > *{ opacity: 0; transform: translateY(6px); animation: enter .35s ease forwards;}
+.stagger > *:nth-child(1){ animation-delay: 0ms;}
+.stagger > *:nth-child(2){ animation-delay: 60ms;}
+.stagger > *:nth-child(3){ animation-delay: 120ms;}
+.stagger > *:nth-child(4){ animation-delay: 180ms;}
+.stagger > *:nth-child(5){ animation-delay: 240ms;}
+.stagger > *:nth-child(6){ animation-delay: 300ms;}
+
+/* Dense dashboard mode */
+[data-dash-dense="true"] .kpi{ padding: 14px 16px 16px; }
+[data-dash-dense="true"] .kpi-value{ font-size: 24px; }
+[data-dash-dense="true"] .kpi-rule{ display: none; }
+[data-dash-dense="true"] .card{ padding: 16px; }
+[data-dash-dense="true"] .list-row{ padding: 9px 0; }
+[data-dash-dense="true"] .li-name{ font-size: 12.5px; }
+
+/* Responsive */
+@media (max-width: 1280px){
+  .dash-grid{ grid-template-columns: 1fr; }
+  .dash-row{ grid-template-columns: 1fr; }
+}
+@media (max-width: 900px){
+  .app{ grid-template-columns: 1fr;}
+  .sb{ display: none;}
+  .kpi-grid{ grid-template-columns: repeat(2, 1fr);}
+  .col-grid{ grid-template-columns: 1fr;}
+  .field-grid{ grid-template-columns: 1fr;}
+}
+
+/* Custom scrollbar */
+.page::-webkit-scrollbar, .modal-body::-webkit-scrollbar, .cp-body::-webkit-scrollbar{ width: 10px; height: 10px;}
+.page::-webkit-scrollbar-thumb, .modal-body::-webkit-scrollbar-thumb, .cp-body::-webkit-scrollbar-thumb{
+  background: var(--line-strong); border-radius: 5px; border: 2px solid var(--bg);
+}
+</style>
+</head>
+<body>
+
+<div class="app" id="app" data-density="regular" data-dash-dense="false">
+
+  <!-- ═══════════ Sidebar ═══════════ -->
+  <aside class="sb" data-screen-label="sidebar">
+    <div class="sb-brand">
+      <div class="sb-mark" aria-label="WingFund">
+        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M5 28 C 12 24, 19 19, 26 14 C 30 11, 33 9.5, 35 8.5"/>
+          <path d="M10 31 C 16 28, 22 24, 28 20"/>
+        </svg>
+      </div>
+      <div>
+        <div class="sb-brand-name">WingFund</div>
+        <div class="sb-brand-tag">உங்கள் சிறகுகள்</div>
+      </div>
+    </div>
+
+    <div class="sb-section">OVERVIEW</div>
+    <nav class="sb-nav">
+      <a class="sb-link active" data-nav="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        Dashboard
+      </a>
+    </nav>
+
+    <div class="sb-section">OPERATIONS</div>
+    <nav class="sb-nav">
+      <a class="sb-link" data-nav="customers">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Customers
+      </a>
+      <a class="sb-link" data-nav="loans">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 10v4M18 10v4"/></svg>
+        Loans
+      </a>
+      <a class="sb-link" data-nav="collections">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Collections
+      </a>
+    </nav>
+
+    <div class="sb-section">INSIGHTS</div>
+    <nav class="sb-nav">
+      <a class="sb-link" data-nav="reports">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>
+        Reports
+      </a>
+    </nav>
+
+    <div class="sb-spacer"></div>
+
+    <div class="sb-user">
+      <div class="sb-avatar">SK</div>
+      <div>
+        <div class="sb-user-name">Sambath Kumar</div>
+        <div class="sb-user-role">Admin · Chennai</div>
+      </div>
+      <div class="sb-user-menu">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="6" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="18" r="1"/></svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════ Main ═══════════ -->
+  <main class="main">
+
+    <header class="topbar">
+      <div class="crumbs">
+        <strong id="crumb-title">Dashboard</strong>
+        <span class="sep">/</span>
+        <span id="crumb-sub">Operations overview</span>
+      </div>
+
+      <div class="tb-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="global-search" placeholder="Search customers, loans, IDs…" />
+        <kbd>⌘K</kbd>
+      </div>
+
+      <div class="tb-spacer"></div>
+
+      <button class="tb-lang" id="lang-toggle" title="Toggle language">
+        <span>EN</span>
+        <span style="color: var(--line-strong);">/</span>
+        <span class="ta">த</span>
+      </button>
+
+      <button class="tb-icon" title="Notifications">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        <span class="dot"></span>
+      </button>
+      <button class="tb-icon" title="Help">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 4"/><circle cx="12" cy="17" r="0.6" fill="currentColor"/></svg>
+      </button>
+
+      <div class="tb-user">
+        <div class="tb-avatar">SK</div>
+        <div>
+          <div class="tb-user-name">Sambath Kumar</div>
+          <div class="tb-user-meta">Admin · WGF-001</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="page page-screens" id="page">
+
+      <!-- ─────────────── DASHBOARD ─────────────── -->
+      <section id="screen-dashboard" class="active">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title" style="font-family: &quot;Open Sans&quot;">Good morning, <em>Sambath</em></h1>
+            <div class="page-sub" id="dash-greeting"><span class="ta">இன்று</span> · 01 May 2026 · Friday · Take your time</div>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-ghost">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export
+            </button>
+            <button class="btn btn-primary" onclick="openLoanModal()">
+              <span class="accent"></span>
+              New Loan
+            </button>
+          </div>
+        </div>
+
+        <div class="kpi-grid stagger">
+          <div class="kpi">
+            <div class="kpi-label">Active Loans</div>
+            <div class="kpi-value" style="font-family: &quot;Open Sans&quot;; border-width: 0px; border-style: solid">847</div>
+            <div class="kpi-rule"></div>
+            <div class="kpi-trend up">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+              <strong>+12.4%</strong><span class="lbl">vs last month</span>
+            </div>
+            <svg class="kpi-spark" width="80" height="40" viewBox="0 0 80 40">
+              <path d="M0 30 L13 24 L26 26 L40 18 L53 20 L66 12 L80 6" fill="none" stroke="#0F4C3A" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Total Disbursed</div>
+            <div class="kpi-value"><span class="unit">₹</span>2.18<span class="unit"> Cr</span></div>
+            <div class="kpi-rule"></div>
+            <div class="kpi-trend up">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+              <strong>+8.1%</strong><span class="lbl">YTD</span>
+            </div>
+            <svg class="kpi-spark" width="80" height="40" viewBox="0 0 80 40">
+              <path d="M0 32 L13 28 L26 22 L40 24 L53 16 L66 14 L80 8" fill="none" stroke="#0F4C3A" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Today's Collection</div>
+            <div class="kpi-value"><span class="unit">₹</span>1,84,720</div>
+            <div class="kpi-rule"></div>
+            <div class="kpi-trend up">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+              <strong>92%</strong><span class="lbl">of target</span>
+            </div>
+            <svg class="kpi-spark" width="80" height="40" viewBox="0 0 80 40">
+              <path d="M0 28 L13 14 L26 22 L40 18 L53 26 L66 16 L80 14" fill="none" stroke="#C9A961" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Overdue Amount</div>
+            <div class="kpi-value"><span class="unit">₹</span>4,28,150</div>
+            <div class="kpi-rule" style="background: var(--danger);"></div>
+            <div class="kpi-trend down">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 7 17 17"/><path d="M17 8v9H8"/></svg>
+              <strong>-3.2%</strong><span class="lbl">31 customers</span>
+            </div>
+            <svg class="kpi-spark" width="80" height="40" viewBox="0 0 80 40">
+              <path d="M0 10 L13 16 L26 14 L40 22 L53 20 L66 26 L80 30" fill="none" stroke="#A8392E" stroke-width="1.5"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-h">
+              <div>
+                <div class="card-eyebrow">Portfolio Aging</div>
+                <h2 class="card-title">Outstanding by days past due</h2>
+              </div>
+              <div style="font-family: var(--font-mono); font-size: 11.5px; color: var(--muted);">Total: <strong style="color: var(--text);">₹2.61 Cr</strong></div>
+            </div>
+            <div class="aging">
+              <div class="aging-row">
+                <div class="aging-lbl">Current<span class="sub">0–30 days</span></div>
+                <div class="aging-track"><div class="aging-fill" style="width: 84%;"></div></div>
+                <div class="aging-val">₹2.19 Cr</div>
+              </div>
+              <div class="aging-row warn">
+                <div class="aging-lbl">Watch<span class="sub">30–60 days</span></div>
+                <div class="aging-track"><div class="aging-fill" style="width: 9%;"></div></div>
+                <div class="aging-val">₹23.4 L</div>
+              </div>
+              <div class="aging-row danger">
+                <div class="aging-lbl">Sub-standard<span class="sub">60–90 days</span></div>
+                <div class="aging-track"><div class="aging-fill" style="width: 4.6%;"></div></div>
+                <div class="aging-val">₹12.0 L</div>
+              </div>
+              <div class="aging-row crit">
+                <div class="aging-lbl">Doubtful<span class="sub">90+ days</span></div>
+                <div class="aging-track"><div class="aging-fill" style="width: 2.4%;"></div></div>
+                <div class="aging-val">₹6.4 L</div>
+              </div>
+            </div>
+
+            <div class="qa">
+              <button class="qa-btn" onclick="openLoanModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <div>
+                  <div class="lbl">New Loan</div>
+                  <div class="sub">Stepped application form</div>
+                </div>
+              </button>
+              <button class="qa-btn" onclick="navigate('collections')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 17l5-5 4 4 8-8"/><path d="M14 8h6v6"/></svg>
+                <div>
+                  <div class="lbl">Record Collection</div>
+                  <div class="sub">Cash / UPI entry</div>
+                </div>
+              </button>
+              <button class="qa-btn" onclick="navigate('customers')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M3 21a9 9 0 0 1 18 0"/></svg>
+                <div>
+                  <div class="lbl">Add Customer</div>
+                  <div class="sub">KYC + onboarding</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <div>
+                <div class="card-eyebrow">Recent Disbursals</div>
+                <h2 class="card-title">This week</h2>
+              </div>
+              <button class="btn btn-sm btn-ghost">View all</button>
+            </div>
+            <div class="list">
+              <div class="disb-row">
+                <div>
+                  <div class="disb-name">Lakshmi Devi</div>
+                  <div class="disb-meta">WGF-2840 · Mylapore · 12 mo @ 18%</div>
+                </div>
+                <div class="disb-amt">₹35,000</div>
+              </div>
+              <div class="disb-row">
+                <div>
+                  <div class="disb-name">Murugan S.</div>
+                  <div class="disb-meta">WGF-2839 · T. Nagar · 6 mo @ 22%</div>
+                </div>
+                <div class="disb-amt">₹15,000</div>
+              </div>
+              <div class="disb-row">
+                <div>
+                  <div class="disb-name">Karthik Raja</div>
+                  <div class="disb-meta">WGF-2838 · Velachery · 18 mo @ 16%</div>
+                </div>
+                <div class="disb-amt">₹50,000</div>
+              </div>
+              <div class="disb-row">
+                <div>
+                  <div class="disb-name">Priya Subramaniam</div>
+                  <div class="disb-meta">WGF-2837 · Anna Nagar · 9 mo @ 20%</div>
+                </div>
+                <div class="disb-amt">₹25,000</div>
+              </div>
+              <div class="disb-row">
+                <div>
+                  <div class="disb-name">Selvi Maran</div>
+                  <div class="disb-meta">WGF-2836 · Tambaram · 12 mo @ 18%</div>
+                </div>
+                <div class="disb-amt">₹40,000</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h">
+            <div>
+              <div class="card-eyebrow">Today's Schedule</div>
+              <h2 class="card-title">Collections due — 01 May 2026</h2>
+            </div>
+            <div style="display:flex; gap: 8px;">
+              <span class="pill solid">28 due today</span>
+              <button class="btn btn-sm btn-secondary">Open sheet</button>
+            </div>
+          </div>
+
+          <div class="date-strip">
+            <div class="calendar">
+              <div class="d">01</div>
+              <div class="m">MAY</div>
+            </div>
+            <div class="stat">
+              <span>Expected</span>
+              <strong>₹2,01,540</strong>
+            </div>
+            <div class="stat green">
+              <span>Collected so far</span>
+              <strong>₹1,84,720</strong>
+            </div>
+            <div class="stat gold">
+              <span>Remaining</span>
+              <strong>₹16,820</strong>
+            </div>
+            <div style="margin-left:auto; font-size: 11px; color: var(--muted);">
+              <span class="ta" style="font-family: var(--font-tamil);">பகுதி நிறைவு</span> · 92% complete
+            </div>
+          </div>
+
+          <div class="list">
+            <div class="list-row">
+              <div class="av">RK</div>
+              <div>
+                <div class="li-name">Ravi Kumar</div>
+                <div class="li-meta">WGF-2102 · T. Nagar · +91 98xxx xxx21 <span class="dot"></span> Partner: Mohan</div>
+              </div>
+              <div style="display:flex; align-items:center; gap: 14px;">
+                <span class="pill success">Collected</span>
+                <div class="li-amount">₹2,400<span class="sub">UPI · 09:14 AM</span></div>
+              </div>
+            </div>
+            <div class="list-row">
+              <div class="av">LD</div>
+              <div>
+                <div class="li-name">Lakshmi Devi</div>
+                <div class="li-meta">WGF-1840 · Mylapore · +91 99xxx xxx07 <span class="dot"></span> Partner: Senthil</div>
+              </div>
+              <div style="display:flex; align-items:center; gap: 14px;">
+                <span class="pill success">Collected</span>
+                <div class="li-amount">₹3,250<span class="sub">Cash · 10:02 AM</span></div>
+              </div>
+            </div>
+            <div class="list-row overdue">
+              <div class="av">MS</div>
+              <div>
+                <div class="li-name">Murugan S.</div>
+                <div class="li-meta">WGF-1721 · Velachery · +91 96xxx xxx48 <span class="dot"></span> 4 days overdue</div>
+              </div>
+              <div style="display:flex; align-items:center; gap: 14px;">
+                <span class="pill danger">Overdue</span>
+                <div class="li-amount">₹1,800<span class="sub">Due · auto-call sent</span></div>
+              </div>
+            </div>
+            <div class="list-row">
+              <div class="av">PS</div>
+              <div>
+                <div class="li-name">Priya Subramaniam</div>
+                <div class="li-meta">WGF-2014 · Anna Nagar · +91 98xxx xxx33 <span class="dot"></span> Partner: Mohan</div>
+              </div>
+              <div style="display:flex; align-items:center; gap: 14px;">
+                <span class="pill warn">In transit</span>
+                <div class="li-amount">₹2,950<span class="sub">Visiting now</span></div>
+              </div>
+            </div>
+            <div class="list-row">
+              <div class="av gold">KR</div>
+              <div>
+                <div class="li-name">Karthik Raja</div>
+                <div class="li-meta">WGF-1933 · Velachery · +91 99xxx xxx12 <span class="dot"></span> Partner: Senthil</div>
+              </div>
+              <div style="display:flex; align-items:center; gap: 14px;">
+                <span class="pill success">Collected</span>
+                <div class="li-amount">₹4,800<span class="sub">UPI · 08:22 AM</span></div>
+              </div>
+            </div>
+            <div class="list-row">
+              <div class="av">SM</div>
+              <div>
+                <div class="li-name">Selvi Maran</div>
+                <div class="li-meta">WGF-1645 · Tambaram · +91 95xxx xxx18 <span class="dot"></span> Partner: Mohan</div>
+              </div>
+              <div style="display:flex; align-items:center; gap: 14px;">
+                <span class="pill neutral">Pending</span>
+                <div class="li-amount">₹3,300<span class="sub">Scheduled · 14:00</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="foot-mark">Made in Chennai</div>
+      </section>
+
+      <!-- ─────────────── CUSTOMERS ─────────────── -->
+      <section id="screen-customers">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Customers <em>directory</em></h1>
+            <div class="page-sub">2,847 people · 31 need a call today · 12 new this week</div>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-ghost">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+              Filter
+            </button>
+            <button class="btn btn-primary">
+              <span class="accent"></span>
+              Add Customer
+            </button>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="chips" id="cust-chips">
+            <button class="chip active" data-filter="all">All <span class="ct">2,847</span></button>
+            <button class="chip" data-filter="active">Active <span class="ct">2,640</span></button>
+            <button class="chip" data-filter="overdue">Overdue <span class="ct">31</span></button>
+            <button class="chip" data-filter="blocked">Blocked <span class="ct">8</span></button>
+            <button class="chip" data-filter="new">New <span class="ct">12</span></button>
+          </div>
+          <div class="search-inline">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="cust-search" placeholder="Search by name, mobile, ID…" />
+          </div>
+        </div>
+
+        <div class="tbl-wrap">
+          <table class="tbl" id="cust-tbl">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Mobile</th>
+                <th>Location</th>
+                <th class="right">Active Loans</th>
+                <th class="right">Outstanding</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- rows injected -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="foot-mark">Made in Chennai</div>
+      </section>
+
+      <!-- ─────────────── LOANS ─────────────── -->
+      <section id="screen-loans">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Loan <em>book</em></h1>
+            <div class="page-sub">847 active · 14 awaiting your review · 3 disbursed today</div>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-primary" onclick="openLoanModal()">
+              <span class="accent"></span>
+              New Loan Application
+            </button>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="chips" id="loan-chips">
+            <button class="chip active" data-loan="all">All Loans <span class="ct">847</span></button>
+            <button class="chip" data-loan="pending">Awaiting review <span class="ct">14</span></button>
+            <button class="chip" data-loan="active">Active <span class="ct">812</span></button>
+            <button class="chip" data-loan="closed">Closed <span class="ct">21</span></button>
+          </div>
+          <div class="search-inline">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input placeholder="Loan ID, customer name…" />
+          </div>
+        </div>
+
+        <div class="loans-layout">
+          <div class="loans-grid stagger" id="loans-grid">
+            <!-- loan cards injected -->
+          </div>
+
+          <aside class="emi-widget">
+            <div class="emi-eyebrow">A QUIET CALCULATION</div>
+            <h3 class="emi-title">What an EMI looks like</h3>
+
+            <div class="emi-row">
+              <label>Principal <span id="emi-p-lbl">₹25,000</span></label>
+              <input type="range" id="emi-p" min="5000" max="50000" step="1000" value="25000" />
+            </div>
+            <div class="emi-row">
+              <label>Interest Rate <span id="emi-r-lbl">18% p.a.</span></label>
+              <input type="range" id="emi-r" min="12" max="28" step="0.5" value="18" />
+            </div>
+            <div class="emi-row">
+              <label>Tenure <span id="emi-n-lbl">12 months</span></label>
+              <input type="range" id="emi-n" min="3" max="24" step="1" value="12" />
+            </div>
+
+            <div class="emi-result">
+              <div>
+                <div class="lbl">Monthly EMI</div>
+                <div class="val accent"><span class="pre">₹</span><span id="emi-emi">2,291</span></div>
+              </div>
+              <div>
+                <div class="lbl">Total Interest</div>
+                <div class="val"><span class="pre">₹</span><span id="emi-int">2,492</span></div>
+              </div>
+              <div>
+                <div class="lbl">Total Payable</div>
+                <div class="val"><span class="pre">₹</span><span id="emi-tot">27,492</span></div>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <div class="foot-mark">Made in Chennai</div>
+      </section>
+
+      <!-- ─────────────── COLLECTIONS ─────────────── -->
+      <section id="screen-collections">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Daily <em>collections</em></h1>
+            <div class="page-sub"><span class="ta" style="font-family: var(--font-tamil);">இன்றைய வசூல்</span> · Sheet for 01 May 2026 · Friday</div>
+          </div>
+          <div class="page-actions">
+            <div class="date-range">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <strong>01 May 2026</strong>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <button class="btn btn-ghost">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Excel
+            </button>
+            <button class="btn btn-secondary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+              WhatsApp
+            </button>
+          </div>
+        </div>
+
+        <div class="col-grid stagger">
+          <div class="col-card">
+            <div class="col-card-h">
+              <h3>Due Today <span class="col-count">28</span></h3>
+              <span class="pill warn">9 awaiting</span>
+            </div>
+            <div class="col-list" id="col-due">
+              <!-- rows injected -->
+            </div>
+            <div class="col-totals">
+              <div class="col-total due">
+                <div class="lbl">Total Due</div>
+                <div class="val">₹2,01,540</div>
+              </div>
+              <div class="col-total pending">
+                <div class="lbl">Pending</div>
+                <div class="val">₹16,820</div>
+              </div>
+              <div class="col-total">
+                <div class="lbl">Customers</div>
+                <div class="val" style="color: var(--text);">28</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-card">
+            <div class="col-card-h">
+              <h3>Collected <span class="col-count">19</span></h3>
+              <span class="pill success">92% efficiency</span>
+            </div>
+            <div class="col-list" id="col-done">
+              <!-- rows injected -->
+            </div>
+            <div class="col-totals">
+              <div class="col-total collected">
+                <div class="lbl">Total Collected</div>
+                <div class="val">₹1,84,720</div>
+              </div>
+              <div class="col-total">
+                <div class="lbl">Cash</div>
+                <div class="val" style="color: var(--accent);">₹78,400</div>
+              </div>
+              <div class="col-total">
+                <div class="lbl">UPI</div>
+                <div class="val" style="color: var(--primary);">₹1,06,320</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="foot-mark">Made in Chennai</div>
+      </section>
+
+      <!-- ─────────────── REPORTS ─────────────── -->
+      <section id="screen-reports">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Insights &amp; <em>reports</em></h1>
+            <div class="page-sub">FY 2026–27 · Updated 01 May 2026, 11:42 AM</div>
+          </div>
+          <div class="page-actions">
+            <div class="date-range">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <strong>Apr 01 — Apr 30, 2026</strong>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <button class="btn btn-ghost">Compare</button>
+          </div>
+        </div>
+
+        <div class="reports-grid stagger">
+          <div class="report-card">
+            <div>
+              <div class="report-eyebrow">FINANCIAL</div>
+              <h3>Profit &amp; Loss</h3>
+            </div>
+            <div class="report-meta">
+              <span>Net income</span>
+              <span class="v" style="color: var(--success);">₹14.82 L · +18%</span>
+            </div>
+            <svg class="report-spark" viewBox="0 0 280 56" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#0F4C3A" stop-opacity="0.18"/>
+                  <stop offset="100%" stop-color="#0F4C3A" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0 42 C 30 38, 50 28, 80 32 S 130 18, 160 22 S 220 8, 280 12 L 280 56 L 0 56 Z" fill="url(#g1)"/>
+              <path d="M0 42 C 30 38, 50 28, 80 32 S 130 18, 160 22 S 220 8, 280 12" fill="none" stroke="#0F4C3A" stroke-width="1.6"/>
+            </svg>
+            <div class="report-foot">
+              <div class="kv-row" style="flex: 1; flex-direction:column; gap:0;">
+                <div class="kv-row"><span style="color: var(--muted);">Revenue</span><span class="v">₹38.4 L</span></div>
+                <div class="kv-row"><span style="color: var(--muted);">Costs</span><span class="v">₹23.6 L</span></div>
+              </div>
+              <button class="btn btn-sm btn-secondary">Generate</button>
+            </div>
+          </div>
+
+          <div class="report-card">
+            <div>
+              <div class="report-eyebrow">RISK</div>
+              <h3>NPA Analysis</h3>
+            </div>
+            <div class="report-meta">
+              <span>Gross NPA</span>
+              <span class="v" style="color: var(--warning);">2.31% · -0.4pp</span>
+            </div>
+            <svg class="report-spark" viewBox="0 0 280 56" preserveAspectRatio="none">
+              <line x1="0" y1="40" x2="280" y2="40" stroke="#E5DFD3" stroke-dasharray="2 4"/>
+              <g fill="#A8392E">
+                <rect x="6" y="22" width="14" height="18" rx="1"/>
+                <rect x="30" y="20" width="14" height="20" rx="1"/>
+                <rect x="54" y="26" width="14" height="14" rx="1"/>
+                <rect x="78" y="18" width="14" height="22" rx="1"/>
+                <rect x="102" y="24" width="14" height="16" rx="1"/>
+              </g>
+              <g fill="#C9A961">
+                <rect x="126" y="14" width="14" height="26" rx="1"/>
+                <rect x="150" y="20" width="14" height="20" rx="1"/>
+                <rect x="174" y="22" width="14" height="18" rx="1"/>
+                <rect x="198" y="28" width="14" height="12" rx="1"/>
+                <rect x="222" y="30" width="14" height="10" rx="1"/>
+                <rect x="246" y="32" width="14" height="8" rx="1"/>
+              </g>
+            </svg>
+            <div class="report-foot">
+              <div style="flex:1;">
+                <div class="kv-row"><span style="color: var(--muted);">Net NPA</span><span class="v">1.04%</span></div>
+                <div class="kv-row"><span style="color: var(--muted);">Provisions</span><span class="v">₹4.18 L</span></div>
+              </div>
+              <button class="btn btn-sm btn-secondary">Generate</button>
+            </div>
+          </div>
+
+          <div class="report-card">
+            <div>
+              <div class="report-eyebrow">TEAM</div>
+              <h3>Partner Performance</h3>
+            </div>
+            <div class="report-meta">
+              <span>Top: Senthil R.</span>
+              <span class="v" style="color: var(--success);">96.4% efficiency</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap: 8px;">
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size: 11.5px; margin-bottom: 4px;"><span>Senthil R.</span><span style="font-family: var(--font-mono); font-weight: 600;">96.4%</span></div>
+                <div class="aging-track" style="height: 6px;"><div class="aging-fill" style="width: 96%;"></div></div>
+              </div>
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size: 11.5px; margin-bottom: 4px;"><span>Mohan K.</span><span style="font-family: var(--font-mono); font-weight: 600;">88.1%</span></div>
+                <div class="aging-track" style="height: 6px;"><div class="aging-fill" style="width: 88%;"></div></div>
+              </div>
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size: 11.5px; margin-bottom: 4px;"><span>Arun V.</span><span style="font-family: var(--font-mono); font-weight: 600;">81.6%</span></div>
+                <div class="aging-track" style="height: 6px;"><div class="aging-fill" style="width: 82%; background: #4F6D58;"></div></div>
+              </div>
+            </div>
+            <div class="report-foot">
+              <span style="color: var(--muted); font-size: 11.5px;">3 partners · 847 active accounts</span>
+              <button class="btn btn-sm btn-secondary">Generate</button>
+            </div>
+          </div>
+
+          <div class="report-card">
+            <div>
+              <div class="report-eyebrow">GROWTH</div>
+              <h3>Disbursal Trends</h3>
+            </div>
+            <div class="report-meta">
+              <span>Apr disbursals</span>
+              <span class="v" style="color: var(--success);">₹54.2 L · +8%</span>
+            </div>
+            <svg class="report-spark" viewBox="0 0 280 56" preserveAspectRatio="none">
+              <path d="M0 48 L 28 42 L 56 38 L 84 30 L 112 34 L 140 22 L 168 26 L 196 18 L 224 14 L 252 10 L 280 6"
+                    fill="none" stroke="#C9A961" stroke-width="1.8"/>
+              <g fill="#0F4C3A">
+                <circle cx="0" cy="48" r="2"/>
+                <circle cx="56" cy="38" r="2"/>
+                <circle cx="112" cy="34" r="2"/>
+                <circle cx="168" cy="26" r="2"/>
+                <circle cx="224" cy="14" r="2"/>
+                <circle cx="280" cy="6" r="2.5" fill="#C9A961"/>
+              </g>
+            </svg>
+            <div class="report-foot">
+              <div style="flex:1;">
+                <div class="kv-row"><span style="color: var(--muted);">Avg ticket</span><span class="v">₹28,400</span></div>
+                <div class="kv-row"><span style="color: var(--muted);">Approval rate</span><span class="v">71%</span></div>
+              </div>
+              <button class="btn btn-sm btn-secondary">Generate</button>
+            </div>
+          </div>
+
+          <div class="report-card">
+            <div>
+              <div class="report-eyebrow">OPERATIONS</div>
+              <h3>Collection Efficiency</h3>
+            </div>
+            <div class="report-meta">
+              <span>30-day rolling</span>
+              <span class="v" style="color: var(--success);">94.2% · target 92%</span>
+            </div>
+            <svg class="report-spark" viewBox="0 0 280 56" preserveAspectRatio="none">
+              <line x1="0" y1="20" x2="280" y2="20" stroke="#C9A961" stroke-dasharray="3 4" stroke-width="1"/>
+              <path d="M0 30 L 14 26 L 28 22 L 42 28 L 56 18 L 70 22 L 84 16 L 98 14 L 112 18 L 126 12 L 140 16 L 154 10 L 168 14 L 182 8 L 196 12 L 210 14 L 224 8 L 238 10 L 252 6 L 266 12 L 280 8"
+                    fill="none" stroke="#0F4C3A" stroke-width="1.6"/>
+            </svg>
+            <div class="report-foot">
+              <div style="flex:1;">
+                <div class="kv-row"><span style="color: var(--muted);">UPI share</span><span class="v">58%</span></div>
+                <div class="kv-row"><span style="color: var(--muted);">Cash share</span><span class="v">42%</span></div>
+              </div>
+              <button class="btn btn-sm btn-secondary">Generate</button>
+            </div>
+          </div>
+
+          <div class="report-card">
+            <div>
+              <div class="report-eyebrow">PORTFOLIO</div>
+              <h3>Customer Aging</h3>
+            </div>
+            <div class="report-meta">
+              <span>Avg vintage</span>
+              <span class="v">14.3 months</span>
+            </div>
+            <svg class="report-spark" viewBox="0 0 280 56" preserveAspectRatio="none">
+              <g>
+                <rect x="0" y="8" width="36%" height="48" rx="2" fill="#0F4C3A"/>
+                <rect x="36%" y="14" width="28%" height="42" rx="2" fill="#1B5E48"/>
+                <rect x="64%" y="22" width="20%" height="34" rx="2" fill="#4F6D58"/>
+                <rect x="84%" y="30" width="16%" height="26" rx="2" fill="#C9A961"/>
+              </g>
+            </svg>
+            <div class="report-foot">
+              <div style="display:flex; gap: 12px; font-size: 11px; flex-wrap: wrap;">
+                <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px;height:8px;background:#0F4C3A;border-radius:2px;"></span>0–6mo · 36%</span>
+                <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px;height:8px;background:#1B5E48;border-radius:2px;"></span>6–12mo · 28%</span>
+                <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px;height:8px;background:#C9A961;border-radius:2px;"></span>24+mo · 16%</span>
+              </div>
+              <button class="btn btn-sm btn-secondary">Generate</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="foot-mark">Made in Chennai · WingFund · FY 2026–27</div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════ Modal: New Loan ═══════════ -->
+<div class="modal-bg" id="loan-modal">
+  <div class="modal" role="dialog" aria-labelledby="lm-title">
+    <div class="modal-h">
+      <div>
+        <div style="font-size: 10px; letter-spacing: .2em; color: var(--accent); font-weight: 700;">NEW APPLICATION</div>
+        <h2 id="lm-title">A new loan</h2>
+      </div>
+      <button class="modal-x" onclick="closeLoanModal()" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="steps" id="steps">
+        <div class="step active"><div class="step-bar"></div><div class="step-num">01</div><div class="step-label">Customer</div></div>
+        <div class="step"><div class="step-bar"></div><div class="step-num">02</div><div class="step-label">Loan terms</div></div>
+        <div class="step"><div class="step-bar"></div><div class="step-num">03</div><div class="step-label">KYC docs</div></div>
+        <div class="step"><div class="step-bar"></div><div class="step-num">04</div><div class="step-label">Review</div></div>
+      </div>
+
+      <div id="step-1">
+        <div class="field-grid">
+          <div class="field"><label>Customer type</label>
+            <select><option>Existing customer</option><option>New customer</option></select></div>
+          <div class="field"><label>Customer ID / Search</label>
+            <input value="WGF-2102 — Ravi Kumar" /></div>
+          <div class="field"><label>Mobile (verified)</label>
+            <input value="+91 98xxx xxx21" /></div>
+          <div class="field"><label>Business type</label>
+            <select><option>Retail / Vendor</option><option>Tea stall</option><option>Tailoring</option><option>Auto / Cab</option></select></div>
+          <div class="field full"><label>Address (shop)</label>
+            <input value="No. 14, Pondy Bazaar, T. Nagar, Chennai 600017" /></div>
+        </div>
+      </div>
+
+      <div id="step-2" style="display:none;">
+        <div class="field-grid">
+          <div class="field"><label>Principal (₹)</label><input value="25,000" /></div>
+          <div class="field"><label>Tenure (months)</label><input value="12" /></div>
+          <div class="field"><label>Interest rate</label><input value="18% p.a." /></div>
+          <div class="field"><label>Repayment frequency</label>
+            <select><option>Daily</option><option>Weekly</option><option>Monthly</option></select></div>
+          <div class="field full"><label>Purpose</label>
+            <textarea>Working capital — restock for May/June season</textarea></div>
+        </div>
+      </div>
+
+      <div id="step-3" style="display:none;">
+        <div class="field-grid">
+          <div class="field"><label>Aadhaar number</label><input value="xxxx xxxx 4912" /></div>
+          <div class="field"><label>PAN</label><input value="ABCDE1234F" /></div>
+          <div class="field full"><label>Photo + signature</label>
+            <input type="file" /></div>
+          <div class="field full"><label>Reference (other shopkeeper)</label>
+            <input value="Murugan S. — WGF-1721" /></div>
+        </div>
+      </div>
+
+      <div id="step-4" style="display:none;">
+        <div style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px;">
+          <div style="font-family: var(--font-display); font-size: 18px; font-weight: 500; margin-bottom: 12px;">Application summary</div>
+          <div class="kv-row"><span style="color:var(--muted);">Customer</span><span class="v">Ravi Kumar (WGF-2102)</span></div>
+          <div class="kv-row"><span style="color:var(--muted);">Principal</span><span class="v">₹25,000</span></div>
+          <div class="kv-row"><span style="color:var(--muted);">Tenure</span><span class="v">12 months</span></div>
+          <div class="kv-row"><span style="color:var(--muted);">Rate</span><span class="v">18% p.a.</span></div>
+          <div class="kv-row"><span style="color:var(--muted);">Daily EMI</span><span class="v" style="color: var(--primary);">₹91</span></div>
+          <div class="kv-row"><span style="color:var(--muted);">Approval</span><span class="v"><span class="pill success" style="vertical-align:middle;">Ready to disburse</span></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-f">
+      <button class="btn btn-ghost" id="lm-back" onclick="stepBack()">Back</button>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-ghost" onclick="closeLoanModal()">Cancel</button>
+        <button class="btn btn-primary" id="lm-next" onclick="stepNext()"><span class="accent"></span>Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ Customer slide panel ═══════════ -->
+<div class="cust-panel-bg" id="cp-bg" onclick="closeCustomer()"></div>
+<aside class="cust-panel" id="cp" aria-hidden="true">
+  <div class="cp-h">
+    <button class="cp-x" onclick="closeCustomer()" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="cp-id" id="cp-id">WGF-2102</div>
+    <div class="cp-name" id="cp-name">Ravi Kumar</div>
+    <div class="cp-loc" id="cp-loc">Pondy Bazaar, T. Nagar · Customer since Aug 2023</div>
+    <div class="cp-pills">
+      <span class="pill solid">Active</span>
+      <span class="pill gold">VIP · 14 cycles</span>
+    </div>
+  </div>
+  <div class="cp-stats">
+    <div class="cp-stat"><div class="lbl">Active loans</div><div class="val">2</div></div>
+    <div class="cp-stat"><div class="lbl">Outstanding</div><div class="val" id="cp-out">₹38,420</div></div>
+    <div class="cp-stat"><div class="lbl">Credit score</div><div class="val" style="color: var(--success);">A+</div></div>
+  </div>
+  <div class="cp-body">
+    <div class="cp-section">
+      <h4>Active loans</h4>
+      <div class="list-row" style="padding: 12px 0;">
+        <div class="av av-lg">L1</div>
+        <div>
+          <div class="li-name">Working capital · WGF-L-2840</div>
+          <div class="li-meta">₹35,000 · 12 mo · 18% · Disbursed 14 Mar 2026</div>
+        </div>
+        <div class="li-amount">₹26,420<span class="sub">Outstanding</span></div>
+      </div>
+      <div class="list-row" style="padding: 12px 0; border-bottom: none;">
+        <div class="av av-lg">L2</div>
+        <div>
+          <div class="li-name">Top-up · WGF-L-2102</div>
+          <div class="li-meta">₹15,000 · 6 mo · 22% · Disbursed 02 Feb 2026</div>
+        </div>
+        <div class="li-amount">₹12,000<span class="sub">Outstanding</span></div>
+      </div>
+    </div>
+    <div class="cp-section">
+      <h4>Recent activity</h4>
+      <div class="cp-tl">
+        <div class="cp-tl-row">
+          <div class="cp-tl-date">May<strong>01</strong></div>
+          <div>
+            <div class="li-name">Collection received</div>
+            <div class="li-meta">UPI · Partner: Mohan</div>
+          </div>
+          <div class="li-amount" style="color: var(--success);">+₹2,400</div>
+        </div>
+        <div class="cp-tl-row">
+          <div class="cp-tl-date">Apr<strong>30</strong></div>
+          <div>
+            <div class="li-name">Collection received</div>
+            <div class="li-meta">Cash · Partner: Mohan</div>
+          </div>
+          <div class="li-amount" style="color: var(--success);">+₹2,400</div>
+        </div>
+        <div class="cp-tl-row">
+          <div class="cp-tl-date">Apr<strong>26</strong></div>
+          <div>
+            <div class="li-name">SMS reminder sent</div>
+            <div class="li-meta">EMI due notification</div>
+          </div>
+          <div class="li-amount" style="color: var(--muted); font-size: 12px;">—</div>
+        </div>
+        <div class="cp-tl-row">
+          <div class="cp-tl-date">Mar<strong>14</strong></div>
+          <div>
+            <div class="li-name">Loan disbursed</div>
+            <div class="li-meta">Working capital · WGF-L-2840</div>
+          </div>
+          <div class="li-amount" style="color: var(--primary);">+₹35,000</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 10px;">
+      <button class="btn btn-secondary" style="flex:1;">Record payment</button>
+      <button class="btn btn-primary" style="flex:1;"><span class="accent"></span>New top-up</button>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════ Tweaks panel ═══════════ -->
+<button class="twk-fab" id="twk-fab" onclick="toggleTweaks()">
+  <span class="tk-dot"></span>TWEAKS
+</button>
+<div class="twk-panel" id="twk-panel">
+  <div class="twk-h">
+    <h4>Tweaks</h4>
+    <button onclick="dismissTweaks()" aria-label="Close">×</button>
+  </div>
+  <div class="twk-body">
+    <div class="twk-section-h">Theme</div>
+    <div class="twk-row">
+      <label>Primary</label>
+      <input type="color" class="twk-color" id="tk-primary" value="#0F4C3A" />
+    </div>
+    <div class="twk-row">
+      <label>Accent</label>
+      <input type="color" class="twk-color" id="tk-accent" value="#C9A961" />
+    </div>
+
+    <div class="twk-section-h">Layout</div>
+    <div class="twk-row">
+      <label>Density</label>
+      <div class="twk-seg" id="tk-density">
+        <button data-v="compact">Compact</button>
+        <button data-v="regular" class="on">Regular</button>
+        <button data-v="comfy">Comfy</button>
+      </div>
+    </div>
+    <div class="twk-row">
+      <label>Dashboard mode</label>
+      <div class="twk-seg" id="tk-dash">
+        <button data-v="false" class="on">Editorial</button>
+        <button data-v="true">Bloomberg</button>
+      </div>
+    </div>
+    <div class="twk-row">
+      <label>Customer view</label>
+      <div class="twk-seg" id="tk-cv">
+        <button data-v="panel" class="on">Slide panel</button>
+        <button data-v="modal">Modal</button>
+      </div>
+    </div>
+
+    <div class="twk-section-h">Locale</div>
+    <div class="twk-row">
+      <label>Show Tamil accents</label>
+      <button class="twk-toggle on" id="tk-tamil" aria-label="Toggle Tamil"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════ Data ═══════════ */
+const CUSTOMERS = [
+  { id:"WGF-2102", name:"Ravi Kumar",          mob:"+91 98xxx xxx21", loc:"T. Nagar",     loans:2, out:38420, st:"active" },
+  { id:"WGF-1840", name:"Lakshmi Devi",        mob:"+91 99xxx xxx07", loc:"Mylapore",     loans:1, out:26420, st:"active" },
+  { id:"WGF-1721", name:"Murugan S.",          mob:"+91 96xxx xxx48", loc:"Velachery",    loans:1, out:14200, st:"overdue" },
+  { id:"WGF-2014", name:"Priya Subramaniam",   mob:"+91 98xxx xxx33", loc:"Anna Nagar",   loans:1, out:21400, st:"active" },
+  { id:"WGF-1933", name:"Karthik Raja",        mob:"+91 99xxx xxx12", loc:"Velachery",    loans:2, out:48200, st:"active" },
+  { id:"WGF-1645", name:"Selvi Maran",         mob:"+91 95xxx xxx18", loc:"Tambaram",     loans:1, out:32100, st:"active" },
+  { id:"WGF-2210", name:"Anand Pillai",        mob:"+91 90xxx xxx04", loc:"Mylapore",     loans:1, out:9100,  st:"new" },
+  { id:"WGF-1488", name:"Kavitha Ravi",        mob:"+91 98xxx xxx91", loc:"T. Nagar",     loans:1, out:5400,  st:"active" },
+  { id:"WGF-1602", name:"Senthil Vel",         mob:"+91 99xxx xxx55", loc:"Tambaram",     loans:1, out:18700, st:"overdue" },
+  { id:"WGF-1359", name:"Meena Krishnan",      mob:"+91 96xxx xxx20", loc:"Anna Nagar",   loans:1, out:11800, st:"blocked" },
+  { id:"WGF-1991", name:"Bhaskar Rao",         mob:"+91 95xxx xxx38", loc:"T. Nagar",     loans:2, out:54600, st:"active" },
+  { id:"WGF-2245", name:"Rajalakshmi K.",      mob:"+91 98xxx xxx67", loc:"Mylapore",     loans:1, out:7900,  st:"new" },
+];
+
+const LOANS = [
+  { id:"WGF-L-2840", cust:"Lakshmi Devi",       loc:"Mylapore",   p:35000, o:26420, emi:3250, t:12, due:"08 May", st:"active",    pct:25, prog:0.24 },
+  { id:"WGF-L-2839", cust:"Murugan S.",         loc:"Velachery",  p:15000, o:9800,  emi:1430, t:6,  due:"04 May", st:"watch",     pct:35, prog:0.35 },
+  { id:"WGF-L-2838", cust:"Karthik Raja",       loc:"Velachery",  p:50000, o:48200, emi:2800, t:18, due:"12 May", st:"active",    pct:4,  prog:0.04 },
+  { id:"WGF-L-2837", cust:"Priya Subramaniam",  loc:"Anna Nagar", p:25000, o:21400, emi:2950, t:9,  due:"06 May", st:"active",    pct:14, prog:0.14 },
+  { id:"WGF-L-2836", cust:"Selvi Maran",        loc:"Tambaram",   p:40000, o:32100, emi:3700, t:12, due:"03 May", st:"watch",     pct:20, prog:0.2 },
+  { id:"WGF-L-2828", cust:"Senthil Vel",        loc:"Tambaram",   p:20000, o:18700, emi:1850, t:12, due:"28 Apr", st:"overdue",   pct:6,  prog:0.06 },
+  { id:"WGF-L-2902", cust:"Bhaskar Rao",        loc:"T. Nagar",   p:50000, o:0,     emi:0,    t:12, due:"—",     st:"pending",   pct:0,  prog:0 },
+  { id:"WGF-L-2820", cust:"Anand Pillai",       loc:"Mylapore",   p:10000, o:9100,  emi:920,  t:12, due:"09 May", st:"active",    pct:9,  prog:0.09 },
+];
+
+const COLLECTIONS_DUE = [
+  { name:"Murugan S.",         loc:"Velachery",  amt:1800, mode:"Cash", partner:"Mohan",   ovd:true },
+  { name:"Priya Subramaniam",  loc:"Anna Nagar", amt:2950, mode:"UPI",  partner:"Mohan",   intr:true },
+  { name:"Selvi Maran",        loc:"Tambaram",   amt:3300, mode:"Cash", partner:"Mohan",   sched:"14:00" },
+  { name:"Senthil Vel",        loc:"Tambaram",   amt:1850, mode:"Cash", partner:"Senthil", ovd:true },
+  { name:"Bhaskar Rao",        loc:"T. Nagar",   amt:4200, mode:"UPI",  partner:"Senthil", sched:"15:30" },
+  { name:"Anand Pillai",       loc:"Mylapore",   amt:1320, mode:"UPI",  partner:"Arun",    sched:"16:00" },
+];
+const COLLECTIONS_DONE = [
+  { name:"Ravi Kumar",      loc:"T. Nagar",   amt:2400, mode:"UPI",  partner:"Mohan",   t:"09:14 AM" },
+  { name:"Lakshmi Devi",    loc:"Mylapore",   amt:3250, mode:"Cash", partner:"Senthil", t:"10:02 AM" },
+  { name:"Karthik Raja",    loc:"Velachery",  amt:4800, mode:"UPI",  partner:"Senthil", t:"08:22 AM" },
+  { name:"Kavitha Ravi",    loc:"T. Nagar",   amt:1200, mode:"UPI",  partner:"Mohan",   t:"08:48 AM" },
+  { name:"Meena Krishnan",  loc:"Anna Nagar", amt:1700, mode:"Cash", partner:"Arun",    t:"09:33 AM" },
+  { name:"Rajalakshmi K.",  loc:"Mylapore",   amt:2100, mode:"UPI",  partner:"Senthil", t:"10:18 AM" },
+];
+
+/* ═══════════ Helpers ═══════════ */
+function fmtINR(n){
+  // Indian grouping: 1,00,000 not 100,000
+  const s = String(Math.round(n));
+  if (s.length <= 3) return s;
+  const last3 = s.slice(-3);
+  const rest = s.slice(0, -3);
+  const grouped = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ",");
+  return grouped + "," + last3;
+}
+function initials(name){
+  return name.split(/\s+/).map(p=>p[0]).slice(0,2).join("").toUpperCase();
+}
+
+/* ═══════════ Navigation ═══════════ */
+function navigate(name){
+  document.querySelectorAll('.sb-link').forEach(l => l.classList.toggle('active', l.dataset.nav === name));
+  document.querySelectorAll('.page-screens > section').forEach(s => s.classList.toggle('active', s.id === 'screen-' + name));
+  const titles = {
+    dashboard: ['Dashboard',   'Operations overview'],
+    customers: ['Customers',   '2,847 records'],
+    loans:     ['Loans',       'Active book'],
+    collections:['Collections','Daily sheet'],
+    reports:   ['Reports',     'Insights · FY 2026–27'],
+  };
+  document.getElementById('crumb-title').textContent = titles[name][0];
+  document.getElementById('crumb-sub').textContent   = titles[name][1];
+  document.getElementById('page').scrollTop = 0;
+}
+document.querySelectorAll('.sb-link').forEach(l => {
+  l.addEventListener('click', () => navigate(l.dataset.nav));
+});
+
+/* ═══════════ Customers table ═══════════ */
+function renderCustomers(filter, q){
+  const tb = document.querySelector('#cust-tbl tbody');
+  const list = CUSTOMERS.filter(c => {
+    if (filter && filter !== 'all' && c.st !== filter) return false;
+    if (q) {
+      const Q = q.toLowerCase();
+      if (!(c.name + ' ' + c.id + ' ' + c.mob + ' ' + c.loc).toLowerCase().includes(Q)) return false;
+    }
+    return true;
+  });
+  tb.innerHTML = list.map(c => `
+    <tr class="${c.st === 'overdue' ? 'overdue' : ''}" onclick="openCustomer('${c.id}','${c.name}','${c.loc}', ${c.out})">
+      <td>
+        <div class="cust">
+          <div class="av ${c.st === 'new' ? 'gold' : ''}">${initials(c.name)}</div>
+          <div class="meta">
+            <span style="font-weight:600;">${c.name}</span>
+            <span class="id">${c.id}</span>
+          </div>
+        </div>
+      </td>
+      <td><span style="font-family: var(--font-mono); font-size: 12.5px;">${c.mob}</span></td>
+      <td>${c.loc}</td>
+      <td class="num">${c.loans}</td>
+      <td class="num bold">₹${fmtINR(c.out)}</td>
+      <td>${pillFor(c.st)}</td>
+    </tr>
+  `).join('');
+  if (!list.length){
+    tb.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 40px; color: var(--muted);">No customers match this filter.</td></tr>`;
+  }
+}
+function pillFor(st){
+  if (st === 'active')  return '<span class="pill success">Active</span>';
+  if (st === 'overdue') return '<span class="pill danger">Overdue</span>';
+  if (st === 'blocked') return '<span class="pill gold">Blocked</span>';
+  if (st === 'new')     return '<span class="pill neutral">New</span>';
+  return '<span class="pill neutral">—</span>';
+}
+let custFilter = 'all';
+document.querySelectorAll('#cust-chips .chip').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('#cust-chips .chip').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    custFilter = b.dataset.filter;
+    renderCustomers(custFilter, document.getElementById('cust-search').value);
+  });
+});
+document.getElementById('cust-search').addEventListener('input', e => {
+  renderCustomers(custFilter, e.target.value);
+});
+
+/* ═══════════ Loans grid ═══════════ */
+function renderLoans(filter){
+  const grid = document.getElementById('loans-grid');
+  const list = LOANS.filter(l => {
+    if (!filter || filter === 'all') return true;
+    if (filter === 'pending') return l.st === 'pending';
+    if (filter === 'closed')  return l.st === 'closed';
+    if (filter === 'active')  return l.st === 'active' || l.st === 'watch' || l.st === 'overdue';
+    return true;
+  });
+  grid.innerHTML = list.map(l => {
+    let pill = '<span class="pill success">Active</span>';
+    let dueClass = '';
+    if (l.st === 'watch')   { pill = '<span class="pill warn">Due soon</span>';   dueClass = 'warn';   }
+    if (l.st === 'overdue') { pill = '<span class="pill danger">Overdue</span>';  dueClass = 'danger'; }
+    if (l.st === 'pending') { pill = '<span class="pill gold">Awaiting review</span>'; }
+    return `
+    <div class="loan-card">
+      <div class="loan-card-h">
+        <div>
+          <div class="loan-id">${l.id}</div>
+          <div class="loan-cust">${l.cust}</div>
+          <div class="loan-loc">${l.loc} · ${l.t} months</div>
+        </div>
+        ${pill}
+      </div>
+      <div class="loan-amt-row">
+        <div>
+          <div class="loan-amt-lbl">Principal</div>
+          <div class="loan-amt-val">₹${fmtINR(l.p)}</div>
+        </div>
+        <div>
+          <div class="loan-amt-lbl">Outstanding</div>
+          <div class="loan-amt-val outstanding">${ l.st === 'pending' ? '—' : '₹' + fmtINR(l.o)}</div>
+          ${ l.st === 'pending' ? '' : `<div class="loan-progress"><span style="width:${(l.prog*100).toFixed(0)}%;"></span></div>`}
+        </div>
+      </div>
+      <div class="loan-foot">
+        <div class="loan-emi">EMI <strong>${ l.st === 'pending' ? '—' : '₹' + fmtINR(l.emi)}</strong></div>
+        <div class="loan-due ${dueClass}">
+          Next due
+          <strong>${l.due}</strong>
+        </div>
+      </div>
+    </div>
+  `;
+  }).join('');
+}
+document.querySelectorAll('#loan-chips .chip').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('#loan-chips .chip').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    renderLoans(b.dataset.loan);
+  });
+});
+
+/* ═══════════ Collections ═══════════ */
+function renderCollections(){
+  document.getElementById('col-due').innerHTML = COLLECTIONS_DUE.map(c => {
+    let badge = '<span class="pill neutral">Pending</span>';
+    let sub = c.sched ? `Scheduled · ${c.sched}` : 'Due now';
+    if (c.ovd){ badge = '<span class="pill danger">Overdue</span>'; sub = 'Auto-call sent'; }
+    if (c.intr){ badge = '<span class="pill warn">In transit</span>'; sub = 'Visiting now'; }
+    return `
+      <div class="col-row ${c.ovd ? 'overdue' : ''}">
+        <div class="av">${initials(c.name)}</div>
+        <div>
+          <div class="li-name">${c.name}</div>
+          <div class="li-meta">${c.loc} · ${c.partner}</div>
+          <div class="partner">${sub}</div>
+        </div>
+        <span class="mode-pill ${c.mode.toLowerCase()}">${c.mode}</span>
+        <div class="li-amount">₹${fmtINR(c.amt)}</div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('col-done').innerHTML = COLLECTIONS_DONE.map(c => `
+    <div class="col-row">
+      <div class="av gold">${initials(c.name)}</div>
+      <div>
+        <div class="li-name">${c.name}</div>
+        <div class="li-meta">${c.loc} · ${c.partner}</div>
+        <div class="partner">${c.t}</div>
+      </div>
+      <span class="mode-pill ${c.mode.toLowerCase()}">${c.mode}</span>
+      <div class="li-amount" style="color: var(--success);">+₹${fmtINR(c.amt)}</div>
+    </div>
+  `).join('');
+}
+
+/* ═══════════ EMI calculator ═══════════ */
+function calcEMI(){
+  const P = +document.getElementById('emi-p').value;
+  const r = (+document.getElementById('emi-r').value) / 12 / 100;
+  const n = +document.getElementById('emi-n').value;
+  const emi = (P * r * Math.pow(1+r, n)) / (Math.pow(1+r, n) - 1);
+  const total = emi * n;
+  const interest = total - P;
+  document.getElementById('emi-p-lbl').textContent = '₹' + fmtINR(P);
+  document.getElementById('emi-r-lbl').textContent = (+document.getElementById('emi-r').value).toFixed(1) + '% p.a.';
+  document.getElementById('emi-n-lbl').textContent = n + ' months';
+  document.getElementById('emi-emi').textContent = fmtINR(emi);
+  document.getElementById('emi-int').textContent = fmtINR(interest);
+  document.getElementById('emi-tot').textContent = fmtINR(total);
+}
+['emi-p','emi-r','emi-n'].forEach(id => document.getElementById(id).addEventListener('input', calcEMI));
+
+/* ═══════════ Loan modal stepped ═══════════ */
+let lmStep = 1;
+function openLoanModal(){ lmStep = 1; renderStep(); document.getElementById('loan-modal').classList.add('show'); }
+function closeLoanModal(){ document.getElementById('loan-modal').classList.remove('show'); }
+function renderStep(){
+  const steps = document.querySelectorAll('#steps .step');
+  steps.forEach((s, i) => {
+    s.classList.remove('active','done');
+    if (i+1 === lmStep) s.classList.add('active');
+    if (i+1 < lmStep) s.classList.add('done');
+  });
+  for (let i=1; i<=4; i++){
+    document.getElementById('step-'+i).style.display = i===lmStep ? 'block' : 'none';
+  }
+  document.getElementById('lm-back').style.visibility = lmStep === 1 ? 'hidden' : 'visible';
+  document.getElementById('lm-next').innerHTML = lmStep === 4
+    ? '<span class="accent"></span>Submit application'
+    : '<span class="accent"></span>Continue';
+}
+function stepNext(){
+  if (lmStep === 4){ closeLoanModal(); return; }
+  lmStep++; renderStep();
+}
+function stepBack(){
+  if (lmStep > 1){ lmStep--; renderStep(); }
+}
+document.getElementById('loan-modal').addEventListener('click', e => {
+  if (e.target.id === 'loan-modal') closeLoanModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape'){ closeLoanModal(); closeCustomer(); } });
+
+/* ═══════════ Customer panel ═══════════ */
+function openCustomer(id, name, loc, out){
+  const cv = window.__TWEAKS.customerView;
+  if (cv === 'modal'){
+    // simple alert-like modal reuse: we'll just toast for variation demo
+    document.getElementById('cp-id').textContent = id;
+    document.getElementById('cp-name').textContent = name;
+    document.getElementById('cp-loc').textContent = loc + ' · Customer profile';
+    document.getElementById('cp-out').textContent = '₹' + fmtINR(out);
+  } else {
+    document.getElementById('cp-id').textContent = id;
+    document.getElementById('cp-name').textContent = name;
+    document.getElementById('cp-loc').textContent = loc + ' · Customer since 2023';
+    document.getElementById('cp-out').textContent = '₹' + fmtINR(out);
+  }
+  document.getElementById('cp-bg').classList.add('show');
+  document.getElementById('cp').classList.add('show');
+}
+function closeCustomer(){
+  document.getElementById('cp-bg').classList.remove('show');
+  document.getElementById('cp').classList.remove('show');
+}
+
+/* ═══════════ Tweaks ═══════════ */
+const T = window.__TWEAKS;
+
+function applyTweaks(){
+  const root = document.documentElement;
+  root.style.setProperty('--primary', T.primaryColor);
+  root.style.setProperty('--accent',  T.accentColor);
+  // derive deeper shade
+  document.getElementById('app').dataset.density = T.density;
+  document.getElementById('app').dataset.dashDense = T.denseDashboard ? 'true' : 'false';
+  // tamil
+  document.querySelectorAll('.ta').forEach(el => el.style.display = T.showTamil ? '' : 'none');
+  // sync UI controls
+  document.getElementById('tk-primary').value = T.primaryColor;
+  document.getElementById('tk-accent').value  = T.accentColor;
+  document.querySelectorAll('#tk-density button').forEach(b => b.classList.toggle('on', b.dataset.v === T.density));
+  document.querySelectorAll('#tk-dash button').forEach(b => b.classList.toggle('on', b.dataset.v === String(T.denseDashboard)));
+  document.querySelectorAll('#tk-cv button').forEach(b => b.classList.toggle('on', b.dataset.v === T.customerView));
+  document.getElementById('tk-tamil').classList.toggle('on', !!T.showTamil);
+}
+function setTweak(edits){
+  Object.assign(T, edits);
+  applyTweaks();
+  try{ window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*'); }catch(e){}
+}
+
+document.getElementById('tk-primary').addEventListener('input', e => setTweak({ primaryColor: e.target.value }));
+document.getElementById('tk-accent').addEventListener('input',  e => setTweak({ accentColor:  e.target.value }));
+document.querySelectorAll('#tk-density button').forEach(b => b.addEventListener('click', () => setTweak({ density: b.dataset.v })));
+document.querySelectorAll('#tk-dash button').forEach(b => b.addEventListener('click', () => setTweak({ denseDashboard: b.dataset.v === 'true' })));
+document.querySelectorAll('#tk-cv button').forEach(b => b.addEventListener('click', () => setTweak({ customerView: b.dataset.v })));
+document.getElementById('tk-tamil').addEventListener('click', () => setTweak({ showTamil: !T.showTamil }));
+
+function toggleTweaks(){
+  const p = document.getElementById('twk-panel');
+  p.classList.toggle('show');
+}
+function dismissTweaks(){
+  document.getElementById('twk-panel').classList.remove('show');
+  try{ window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*'); }catch(e){}
+}
+
+// Host protocol — show FAB only when host activates Tweaks
+window.addEventListener('message', e => {
+  const t = e.data && e.data.type;
+  if (t === '__activate_edit_mode'){
+    document.getElementById('twk-fab').classList.add('show');
+  } else if (t === '__deactivate_edit_mode'){
+    document.getElementById('twk-fab').classList.remove('show');
+    document.getElementById('twk-panel').classList.remove('show');
+  }
+});
+try{ window.parent.postMessage({ type: '__edit_mode_available' }, '*'); }catch(e){}
+
+/* Language toggle (top bar) */
+document.getElementById('lang-toggle').addEventListener('click', () => setTweak({ showTamil: !T.showTamil }));
+
+/* ═══════════ Init ═══════════ */
+renderCustomers('all', '');
+renderLoans('all');
+renderCollections();
+calcEMI();
+applyTweaks();
+</script>
+</body>
+</html>
