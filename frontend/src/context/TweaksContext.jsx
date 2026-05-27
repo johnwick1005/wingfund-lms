@@ -1,18 +1,29 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
+const STORAGE_KEY = 'wf-theme';
+
 const DEFAULTS = {
-  primaryColor:   '#8C5A82',
-  accentColor:    '#C9A961',
+  primaryColor:   null,
+  accentColor:    null,
   density:        'regular',
   denseDashboard: false,
   customerView:   'panel',
   showTamil:      true,
+  theme:          'light',
 };
+
+function initialTheme() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved === 'light' || saved === 'dark') return saved;
+  } catch (_) {}
+  return DEFAULTS.theme;
+}
 
 const TweaksContext = createContext(null);
 
 export function TweaksProvider({ children }) {
-  const [tweaks, setTweaksState] = useState(DEFAULTS);
+  const [tweaks, setTweaksState] = useState({ ...DEFAULTS, theme: initialTheme() });
 
   function setTweaks(edits) {
     setTweaksState(prev => ({ ...prev, ...edits }));
@@ -21,11 +32,25 @@ export function TweaksProvider({ children }) {
     } catch (_) {}
   }
 
+  function toggleTheme() {
+    setTweaks({ theme: tweaks.theme === 'dark' ? 'light' : 'dark' });
+  }
+
+  // Apply light/dark theme + persist.
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', tweaks.theme);
+    try { localStorage.setItem(STORAGE_KEY, tweaks.theme); } catch (_) {}
+  }, [tweaks.theme]);
+
+  // Only override brand colors when the edit-mode picker actively sets them,
+  // so the theme stylesheet stays authoritative by default.
   useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty('--primary', tweaks.primaryColor);
-    root.style.setProperty('--accent',  tweaks.accentColor);
+    if (tweaks.primaryColor) root.style.setProperty('--primary', tweaks.primaryColor);
+    if (tweaks.accentColor)  root.style.setProperty('--accent',  tweaks.accentColor);
+  }, [tweaks.primaryColor, tweaks.accentColor]);
 
+  useEffect(() => {
     const handler = (e) => {
       const t = e.data?.type;
       if (t === '__activate_edit_mode') {
@@ -38,10 +63,10 @@ export function TweaksProvider({ children }) {
     window.addEventListener('message', handler);
     try { window.parent.postMessage({ type: '__edit_mode_available' }, '*'); } catch (_) {}
     return () => window.removeEventListener('message', handler);
-  }, [tweaks.primaryColor, tweaks.accentColor]);
+  }, []);
 
   return (
-    <TweaksContext.Provider value={{ tweaks, setTweaks }}>
+    <TweaksContext.Provider value={{ tweaks, setTweaks, toggleTheme }}>
       {children}
     </TweaksContext.Provider>
   );

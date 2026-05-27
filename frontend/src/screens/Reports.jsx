@@ -155,8 +155,10 @@ export default function Reports() {
           </svg>
           <div className="report-foot">
             <div style={{ flex: 1 }}>
-              <div className="kv-row"><span style={{ color: 'var(--muted)' }}>UPI share</span><span className="v">58%</span></div>
-              <div className="kv-row"><span style={{ color: 'var(--muted)' }}>Cash share</span><span className="v">42%</span></div>
+              <div className="kv-row"><span style={{ color: 'var(--muted)' }}>UPI</span><span className="v" style={{ color: 'var(--violet)' }}>38%</span></div>
+              <div className="kv-row"><span style={{ color: 'var(--muted)' }}>Cash</span><span className="v" style={{ color: 'var(--primary)' }}>25%</span></div>
+              <div className="kv-row"><span style={{ color: 'var(--muted)' }}>Bank Transfer</span><span className="v" style={{ color: 'var(--blue)' }}>20%</span></div>
+              <div className="kv-row"><span style={{ color: 'var(--muted)' }}>NEFT</span><span className="v" style={{ color: 'var(--amber)' }}>17%</span></div>
             </div>
             <button className="btn btn-sm btn-secondary">Generate</button>
           </div>
@@ -170,17 +172,18 @@ export default function Reports() {
             <span className="v">14.3 months</span>
           </div>
           <svg className="report-spark" viewBox="0 0 280 56" preserveAspectRatio="none">
-            <rect x="0"   y="8"  width="101" height="48" rx="2" fill="var(--primary)"/>
-            <rect x="101" y="14" width="78"  height="42" rx="2" fill="var(--primary-tint)"/>
-            <rect x="179" y="22" width="56"  height="34" rx="2" fill="#4F6D58"/>
-            <rect x="235" y="30" width="45"  height="26" rx="2" fill="var(--accent)"/>
+            <rect x="0"   y="8"  width="101" height="48" rx="2" fill="var(--success)"/>
+            <rect x="101" y="14" width="78"  height="42" rx="2" fill="var(--warning)"/>
+            <rect x="179" y="22" width="56"  height="34" rx="2" fill="#EA580C"/>
+            <rect x="235" y="30" width="45"  height="26" rx="2" fill="var(--danger)"/>
           </svg>
           <div className="report-foot">
             <div style={{ display: 'flex', gap: '12px', fontSize: '11px', flexWrap: 'wrap' }}>
               {[
-                { color: 'var(--primary)',      label: '0–6mo · 36%' },
-                { color: 'var(--primary-tint)', label: '6–12mo · 28%' },
-                { color: 'var(--accent)',        label: '24+mo · 16%' },
+                { color: 'var(--success)', label: '0–6mo · 36%' },
+                { color: 'var(--warning)', label: '6–12mo · 28%' },
+                { color: '#EA580C',         label: '12–24mo · 20%' },
+                { color: 'var(--danger)',  label: '24+mo · 16%' },
               ].map(l => (
                 <span key={l.label} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <span style={{ width: '8px', height: '8px', background: l.color, borderRadius: '2px' }}/>
@@ -193,7 +196,6 @@ export default function Reports() {
         </div>
       </div>
 
-      <div className="foot-mark">Made in Chennai · WingFund · FY 2026–27</div>
     </section>
   );
 }

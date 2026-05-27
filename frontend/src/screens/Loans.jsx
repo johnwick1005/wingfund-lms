@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { fmtINR } from '../utils/format.js';
+import { Button, Pagination, usePagination, EmptyState } from '../components/ui';
 
 const LOANS = [
   { id: 'WGF-L-2840', customer: 'Lakshmi Devi',      location: 'Mylapore',   principal: 35000, outstanding: 26420, emi: 3250, tenure: 12, nextDue: '08 May', status: 'active',  progress: 0.24 },
@@ -10,13 +11,20 @@ const LOANS = [
   { id: 'WGF-L-2828', customer: 'Senthil Vel',       location: 'Tambaram',   principal: 20000, outstanding: 18700, emi: 1850, tenure: 12, nextDue: '28 Apr', status: 'overdue', progress: 0.06 },
   { id: 'WGF-L-2902', customer: 'Bhaskar Rao',       location: 'T. Nagar',   principal: 50000, outstanding: 0,     emi: 0,    tenure: 12, nextDue: '—',      status: 'pending', progress: 0 },
   { id: 'WGF-L-2820', customer: 'Anand Pillai',      location: 'Mylapore',   principal: 10000, outstanding: 9100,  emi: 920,  tenure: 12, nextDue: '09 May', status: 'active',  progress: 0.09 },
+  // ── Closed loans (paid off in full) ──
+  { id: 'WGF-L-2701', customer: 'Vimala Rao',        location: 'Mylapore',   principal: 30000, outstanding: 0,     emi: 0,    tenure: 12, nextDue: '—', closedOn: '12 Apr 2026', status: 'closed', progress: 1 },
+  { id: 'WGF-L-2580', customer: 'Subramani N.',      location: 'T. Nagar',   principal: 20000, outstanding: 0,     emi: 0,    tenure: 6,  nextDue: '—', closedOn: '03 Apr 2026', status: 'closed', progress: 1 },
+  { id: 'WGF-L-2455', customer: 'Lakshmana A.',      location: 'Velachery',  principal: 50000, outstanding: 0,     emi: 0,    tenure: 18, nextDue: '—', closedOn: '28 Mar 2026', status: 'closed', progress: 1 },
+  { id: 'WGF-L-2398', customer: 'Indira Devi',       location: 'Anna Nagar', principal: 15000, outstanding: 0,     emi: 0,    tenure: 12, nextDue: '—', closedOn: '19 Mar 2026', status: 'closed', progress: 1 },
+  { id: 'WGF-L-2340', customer: 'Govindan R.',       location: 'Tambaram',   principal: 25000, outstanding: 0,     emi: 0,    tenure: 12, nextDue: '—', closedOn: '05 Mar 2026', status: 'closed', progress: 1 },
 ];
 
 function pillFor(status) {
-  if (status === 'watch')   return <span className="pill warn">Due soon</span>;
-  if (status === 'overdue') return <span className="pill danger">Overdue</span>;
-  if (status === 'pending') return <span className="pill gold">Awaiting review</span>;
-  return <span className="pill success">Active</span>;
+  if (status === 'watch')   return <span className="pill warn">Due soon</span>;        // Yellow
+  if (status === 'overdue') return <span className="pill danger">Overdue</span>;       // Red
+  if (status === 'pending') return <span className="pill warn">Awaiting review</span>; // Yellow
+  if (status === 'closed')  return <span className="pill success">Closed</span>;       // Green
+  return <span className="pill success">Active</span>;                                  // Green
 }
 
 function EmiWidget() {
@@ -68,6 +76,8 @@ function EmiWidget() {
   );
 }
 
+const PAGE_SIZE = 6;
+
 export default function Loans({ onNewLoan }) {
   const [filter, setFilter] = useState('all');
 
@@ -79,11 +89,17 @@ export default function Loans({ onNewLoan }) {
     return true;
   });
 
+  const { page, setPage, totalPages, pageItems, total, pageSize } =
+    usePagination(filtered, PAGE_SIZE);
+
+  // Reset to page 1 when the filter changes so the user always sees the first batch.
+  React.useEffect(() => { setPage(1); }, [filter]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const counts = {
     all:     LOANS.length,
     pending: LOANS.filter(l => l.status === 'pending').length,
     active:  LOANS.filter(l => ['active', 'watch', 'overdue'].includes(l.status)).length,
-    closed:  0,
+    closed:  LOANS.filter(l => l.status === 'closed').length,
   };
 
   return (
@@ -94,9 +110,18 @@ export default function Loans({ onNewLoan }) {
           <div className="page-sub">847 active · 14 awaiting your review · 3 disbursed today</div>
         </div>
         <div className="page-actions">
-          <button className="btn btn-primary" onClick={onNewLoan}>
-            <span className="accent" />New Loan Application
-          </button>
+          <Button
+            variant="primary"
+            onClick={onNewLoan}
+            leftIcon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            }
+          >
+            New Loan Application
+          </Button>
         </div>
       </div>
 
@@ -104,9 +129,9 @@ export default function Loans({ onNewLoan }) {
         <div className="chips">
           {[
             ['all',     'All Loans',       counts.all],
-            ['pending', 'Awaiting review', 14],
-            ['active',  'Active',          812],
-            ['closed',  'Closed',          21],
+            ['pending', 'Awaiting review', counts.pending],
+            ['active',  'Active',          counts.active],
+            ['closed',  'Closed',          counts.closed],
           ].map(([v, lbl, ct]) => (
             <button
               key={v}
@@ -126,53 +151,83 @@ export default function Loans({ onNewLoan }) {
       </div>
 
       <div className="loans-layout">
-        <div className="loans-grid stagger">
-          {filtered.map(l => {
-            const dueClass = l.status === 'warn' ? 'warn' : l.status === 'overdue' ? 'danger' : '';
-            return (
-              <div key={l.id} className="loan-card">
-                <div className="loan-card-h">
-                  <div>
-                    <div className="loan-id">{l.id}</div>
-                    <div className="loan-cust">{l.customer}</div>
-                    <div className="loan-loc">{l.location} · {l.tenure} months</div>
-                  </div>
-                  {pillFor(l.status)}
-                </div>
-                <div className="loan-amt-row">
-                  <div>
-                    <div className="loan-amt-lbl">Principal</div>
-                    <div className="loan-amt-val">₹{fmtINR(l.principal)}</div>
-                  </div>
-                  <div>
-                    <div className="loan-amt-lbl">Outstanding</div>
-                    <div className="loan-amt-val outstanding">
-                      {l.status === 'pending' ? '—' : `₹${fmtINR(l.outstanding)}`}
-                    </div>
-                    {l.status !== 'pending' && (
-                      <div className="loan-progress">
-                        <span style={{ width: `${(l.progress * 100).toFixed(0)}%` }} />
+        <div>
+          {total === 0 ? (
+            <EmptyState
+              icon={
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="6" width="18" height="13" rx="2" />
+                  <path d="M3 10h18" />
+                </svg>
+              }
+              title="No loans in this view"
+              description="Try a different filter, or create a new loan application."
+              action={
+                <Button size="sm" variant="primary" onClick={onNewLoan}>
+                  New Loan
+                </Button>
+              }
+            />
+          ) : (
+            <>
+              <div className="loans-grid stagger">
+                {pageItems.map(l => {
+                  const dueClass = l.status === 'warn' ? 'warn' : l.status === 'overdue' ? 'danger' : '';
+                  return (
+                    <div key={l.id} className="loan-card">
+                      <div className="loan-card-h">
+                        <div>
+                          <div className="loan-id">{l.id}</div>
+                          <div className="loan-cust">{l.customer}</div>
+                          <div className="loan-loc">{l.location} · {l.tenure} months</div>
+                        </div>
+                        {pillFor(l.status)}
                       </div>
-                    )}
-                  </div>
-                </div>
-                <div className="loan-foot">
-                  <div className="loan-emi">
-                    EMI <strong>{l.status === 'pending' ? '—' : `₹${fmtINR(l.emi)}`}</strong>
-                  </div>
-                  <div className={`loan-due ${dueClass}`}>
-                    Next due<strong>{l.nextDue}</strong>
-                  </div>
-                </div>
+                      <div className="loan-amt-row">
+                        <div>
+                          <div className="loan-amt-lbl">Principal</div>
+                          <div className="loan-amt-val">₹{fmtINR(l.principal)}</div>
+                        </div>
+                        <div>
+                          <div className="loan-amt-lbl">Outstanding</div>
+                          <div className="loan-amt-val outstanding">
+                            {l.status === 'pending' ? '—' : `₹${fmtINR(l.outstanding)}`}
+                          </div>
+                          {l.status !== 'pending' && (
+                            <div className="loan-progress">
+                              <span style={{ width: `${(l.progress * 100).toFixed(0)}%` }} />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="loan-foot">
+                        <div className="loan-emi">
+                          EMI <strong>{(l.status === 'pending' || l.status === 'closed') ? '—' : `₹${fmtINR(l.emi)}`}</strong>
+                        </div>
+                        <div className={`loan-due ${dueClass}`}>
+                          {l.status === 'closed' ? 'Closed on' : 'Next due'}
+                          <strong>{l.status === 'closed' ? l.closedOn : l.nextDue}</strong>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            );
-          })}
+
+              <Pagination
+                page={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+                totalItems={total}
+                pageSize={pageSize}
+              />
+            </>
+          )}
         </div>
 
         <EmiWidget />
       </div>
 
-      <div className="foot-mark">Made in Chennai</div>
     </section>
   );
 }

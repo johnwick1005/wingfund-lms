@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { fmtINR, initials } from '../utils/format.js';
+import { Button, Pagination, usePagination } from '../components/ui';
 
 const CUSTOMERS = [
   { id: 'WGF-2102', name: 'Ravi Kumar',         mobile: '+91 98xxx xxx21', location: 'T. Nagar',    loans: 2, outstanding: 38420, status: 'active' },
@@ -17,10 +18,10 @@ const CUSTOMERS = [
 ];
 
 const STATUS_PILL = {
-  active:  <span className="pill success">Active</span>,
-  overdue: <span className="pill danger">Overdue</span>,
-  blocked: <span className="pill gold">Blocked</span>,
-  new:     <span className="pill neutral">New</span>,
+  active:  <span className="pill success">Active</span>,    // Green
+  overdue: <span className="pill danger">Overdue</span>,    // Red
+  blocked: <span className="pill danger">Blocked</span>,    // Red
+  new:     <span className="pill warn">New</span>,          // Yellow (awaiting onboarding)
 };
 
 export default function Customers({ onOpenCustomer }) {
@@ -44,6 +45,12 @@ export default function Customers({ onOpenCustomer }) {
     new:     CUSTOMERS.filter(c => c.status === 'new').length,
   };
 
+  const { page, setPage, totalPages, pageItems, total, pageSize } =
+    usePagination(filtered, 8);
+
+  // Reset to page 1 whenever filter or search changes.
+  useEffect(() => { setPage(1); }, [filter, query]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <section id="screen-customers" className="active">
       <div className="page-header">
@@ -56,9 +63,17 @@ export default function Customers({ onOpenCustomer }) {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             Filter
           </button>
-          <button className="btn btn-primary">
-            <span className="accent" />Add Customer
-          </button>
+          <Button
+            variant="primary"
+            leftIcon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            }
+          >
+            Add Customer
+          </Button>
         </div>
       </div>
 
@@ -105,7 +120,7 @@ export default function Customers({ onOpenCustomer }) {
                   No customers match this filter.
                 </td>
               </tr>
-            ) : filtered.map(c => (
+            ) : pageItems.map(c => (
               <tr
                 key={c.id}
                 className={c.status === 'overdue' ? 'overdue' : ''}
@@ -131,7 +146,14 @@ export default function Customers({ onOpenCustomer }) {
         </table>
       </div>
 
-      <div className="foot-mark">Made in Chennai</div>
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        totalItems={total}
+        pageSize={pageSize}
+      />
+
     </section>
   );
 }

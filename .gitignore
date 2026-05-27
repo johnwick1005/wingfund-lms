@@ -4,3 +4,4 @@ frontend/dist
 backend/node_modules
 .env
 .DS_Store
+java-backend/target/

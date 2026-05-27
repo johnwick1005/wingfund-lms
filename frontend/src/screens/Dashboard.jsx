@@ -1,6 +1,7 @@
 import React from 'react';
 import { fmtINR, initials } from '../utils/format.js';
 import { useTweaks } from '../context/TweaksContext.jsx';
+import { Button, Card, Badge, Avatar, EmptyState } from '../components/ui';
 
 const SCHEDULE = [
   { av: 'RK', name: 'Ravi Kumar',        id: 'WGF-2102', loc: 'T. Nagar',   phone: '+91 98xxx xxx21', partner: 'Mohan',   status: 'success', label: 'Collected',  amount: 2400,  sub: 'UPI · 09:14 AM' },
@@ -19,6 +20,18 @@ const DISBURSALS = [
   { name: 'Selvi Maran',       id: 'WGF-2836', loc: 'Tambaram',   mo: 12, rate: 18, amt: 40000 },
 ];
 
+/** Maps schedule row.status (legacy CSS class names) to Badge variants. */
+const STATUS_TO_VARIANT = {
+  success: 'success',
+  warn:    'warning',
+  danger:  'danger',
+  neutral: 'neutral',
+};
+
+const TODAY = new Date();
+const DATE_STR = TODAY.toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
+const DAY_STR = TODAY.toLocaleDateString('en-IN', { weekday: 'long' });
+
 export default function Dashboard({ onNewLoan, onNavigate }) {
   const { tweaks } = useTweaks();
 
@@ -32,20 +45,34 @@ export default function Dashboard({ onNewLoan, onNavigate }) {
           <div className="page-sub">
             {tweaks.showTamil && <span className="ta">இன்று</span>}
             {tweaks.showTamil && ' · '}
-            01 May 2026 · Friday · Take your time
+            {DATE_STR} · {DAY_STR} · Take your time
           </div>
         </div>
         <div className="page-actions">
-          <button className="btn btn-ghost">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
+          <Button
+            variant="ghost"
+            leftIcon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+            }
+          >
             Export
-          </button>
-          <button className="btn btn-primary" onClick={onNewLoan}>
-            <span className="accent" />New Loan
-          </button>
+          </Button>
+          <Button
+            variant="primary"
+            onClick={onNewLoan}
+            leftIcon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            }
+          >
+            Create Loan Application
+          </Button>
         </div>
       </div>
 
@@ -132,7 +159,7 @@ export default function Dashboard({ onNewLoan, onNavigate }) {
           <div className="qa">
             <button className="qa-btn" onClick={onNewLoan}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              <div><div className="lbl">New Loan</div><div className="sub">Stepped application form</div></div>
+              <div><div className="lbl">Create Loan Application</div><div className="sub">Capture customer, terms, and KYC</div></div>
             </button>
             <button className="qa-btn" onClick={() => onNavigate('collections')}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M2 17l5-5 4 4 8-8"/><path d="M14 8h6v6"/></svg>
@@ -145,26 +172,50 @@ export default function Dashboard({ onNewLoan, onNavigate }) {
           </div>
         </div>
 
-        <div className="card">
-          <div className="card-h">
+        <Card aria-labelledby="disbursals-title">
+          <Card.Header>
             <div>
-              <div className="card-eyebrow">Recent Disbursals</div>
-              <h2 className="card-title">This week</h2>
+              <Card.Eyebrow>Recent Disbursals</Card.Eyebrow>
+              <Card.Title id="disbursals-title">This week</Card.Title>
             </div>
-            <button className="btn btn-sm btn-ghost">View all</button>
-          </div>
-          <div className="list">
-            {DISBURSALS.map(d => (
-              <div key={d.id} className="disb-row">
-                <div>
-                  <div className="disb-name">{d.name}</div>
-                  <div className="disb-meta">{d.id} · {d.loc} · {d.mo} mo @ {d.rate}%</div>
+            <Card.Action>
+              <Button size="sm" variant="ghost" onClick={() => onNavigate('loans')}>
+                View all
+              </Button>
+            </Card.Action>
+          </Card.Header>
+
+          {DISBURSALS.length === 0 ? (
+            <EmptyState
+              icon={
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 7h18M3 12h18M3 17h12" />
+                </svg>
+              }
+              title="No disbursals yet this week"
+              description="New approvals will appear here as soon as they're paid out."
+              action={
+                <Button size="sm" variant="primary" onClick={onNewLoan}>
+                  Create Loan
+                </Button>
+              }
+            />
+          ) : (
+            <div className="list">
+              {DISBURSALS.map(d => (
+                <div key={d.id} className="disb-row">
+                  <div>
+                    <div className="disb-name">{d.name}</div>
+                    <div className="disb-meta">
+                      {d.id} · {d.loc} · {d.mo} mo @ {d.rate}%
+                    </div>
+                  </div>
+                  <div className="disb-amt">₹{fmtINR(d.amt)}</div>
                 </div>
-                <div className="disb-amt">₹{fmtINR(d.amt)}</div>
-              </div>
-            ))}
-          </div>
-        </div>
+              ))}
+            </div>
+          )}
+        </Card>
       </div>
 
       <div className="card">
@@ -173,9 +224,9 @@ export default function Dashboard({ onNewLoan, onNavigate }) {
             <div className="card-eyebrow">Today's Schedule</div>
             <h2 className="card-title">Collections due — 01 May 2026</h2>
           </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <span className="pill solid">28 due today</span>
-            <button className="btn btn-sm btn-secondary">Open sheet</button>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <Badge variant="primary" solid>28 due today</Badge>
+            <Button size="sm" variant="secondary">Open sheet</Button>
           </div>
         </div>
 
@@ -196,7 +247,7 @@ export default function Dashboard({ onNewLoan, onNavigate }) {
         <div className="list">
           {SCHEDULE.map(row => (
             <div key={row.id} className={`list-row ${row.overdue ? 'overdue' : ''}`}>
-              <div className={`av ${row.gold ? 'gold' : ''}`}>{row.av}</div>
+              <Avatar name={row.name} variant={row.gold ? 'primary' : 'default'} />
               <div>
                 <div className="li-name">{row.name}</div>
                 <div className="li-meta">
@@ -206,7 +257,7 @@ export default function Dashboard({ onNewLoan, onNavigate }) {
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <span className={`pill ${row.status}`}>{row.label}</span>
+                <Badge variant={STATUS_TO_VARIANT[row.status] || 'neutral'}>{row.label}</Badge>
                 <div className="li-amount">₹{fmtINR(row.amount)}<span className="sub">{row.sub}</span></div>
               </div>
             </div>
@@ -214,7 +265,6 @@ export default function Dashboard({ onNewLoan, onNavigate }) {
         </div>
       </div>
 
-      <div className="foot-mark">Made in Chennai</div>
     </section>
   );
 }

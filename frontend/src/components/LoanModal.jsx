@@ -16,11 +16,11 @@ function Step1() {
       </div>
       <div className="field">
         <label>Customer ID / Search</label>
-        <input defaultValue="WGF-2102 — Ravi Kumar" />
+        <input placeholder="Search by customer ID or name" />
       </div>
       <div className="field">
         <label>Mobile (verified)</label>
-        <input defaultValue="+91 98xxx xxx21" />
+        <input placeholder="+91 98xxx xxx21" />
       </div>
       <div className="field">
         <label>Business type</label>
@@ -28,7 +28,7 @@ function Step1() {
       </div>
       <div className="field full">
         <label>Address (shop)</label>
-        <input defaultValue="No. 14, Pondy Bazaar, T. Nagar, Chennai 600017" />
+        <input placeholder="Shop address with city and PIN code" />
       </div>
     </div>
   );
@@ -37,16 +37,16 @@ function Step1() {
 function Step2() {
   return (
     <div className="field-grid">
-      <div className="field"><label>Principal (₹)</label><input defaultValue="25,000" /></div>
-      <div className="field"><label>Tenure (months)</label><input defaultValue="12" /></div>
-      <div className="field"><label>Interest rate</label><input defaultValue="18% p.a." /></div>
+      <div className="field"><label>Principal (₹)</label><input placeholder="25,000" /></div>
+      <div className="field"><label>Tenure (months)</label><input placeholder="12" /></div>
+      <div className="field"><label>Interest rate</label><input placeholder="18% p.a." /></div>
       <div className="field">
         <label>Repayment frequency</label>
         <select><option>Daily</option><option>Weekly</option><option>Monthly</option></select>
       </div>
       <div className="field full">
         <label>Purpose</label>
-        <textarea defaultValue="Working capital — restock for May/June season" />
+        <textarea placeholder="Working capital, inventory purchase, equipment upgrade..." />
       </div>
     </div>
   );
@@ -55,12 +55,12 @@ function Step2() {
 function Step3() {
   return (
     <div className="field-grid">
-      <div className="field"><label>Aadhaar number</label><input defaultValue="xxxx xxxx 4912" /></div>
-      <div className="field"><label>PAN</label><input defaultValue="ABCDE1234F" /></div>
+      <div className="field"><label>Aadhaar number</label><input placeholder="xxxx xxxx 4912" /></div>
+      <div className="field"><label>PAN</label><input placeholder="ABCDE1234F" /></div>
       <div className="field full"><label>Photo + signature</label><input type="file" /></div>
       <div className="field full">
         <label>Reference (other shopkeeper)</label>
-        <input defaultValue="Murugan S. — WGF-1721" />
+        <input placeholder="Reference name or customer ID" />
       </div>
     </div>
   );
@@ -123,7 +123,7 @@ export default function LoanModal({ isOpen, onClose }) {
             <div style={{ fontSize: '10px', letterSpacing: '0.2em', color: 'var(--accent)', fontWeight: 700 }}>
               NEW APPLICATION
             </div>
-            <h2 id="lm-title">A new loan</h2>
+            <h2 id="lm-title">Create loan application</h2>
           </div>
           <button className="modal-x" onClick={handleClose} aria-label="Close">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

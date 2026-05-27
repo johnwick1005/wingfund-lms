@@ -1,27 +1,36 @@
 import React from 'react';
 import { fmtINR, initials } from '../utils/format.js';
 import { useTweaks } from '../context/TweaksContext.jsx';
+import { Pagination, usePagination } from '../components/ui';
 
 const DUE = [
-  { name: 'Murugan S.',        location: 'Velachery',  amount: 1800, mode: 'Cash', partner: 'Mohan',   overdue: true,  inTransit: false, scheduled: null },
-  { name: 'Priya Subramaniam', location: 'Anna Nagar', amount: 2950, mode: 'UPI',  partner: 'Mohan',   overdue: false, inTransit: true,  scheduled: null },
-  { name: 'Selvi Maran',       location: 'Tambaram',   amount: 3300, mode: 'Cash', partner: 'Mohan',   overdue: false, inTransit: false, scheduled: '14:00' },
-  { name: 'Senthil Vel',       location: 'Tambaram',   amount: 1850, mode: 'Cash', partner: 'Senthil', overdue: true,  inTransit: false, scheduled: null },
-  { name: 'Bhaskar Rao',       location: 'T. Nagar',   amount: 4200, mode: 'UPI',  partner: 'Senthil', overdue: false, inTransit: false, scheduled: '15:30' },
-  { name: 'Anand Pillai',      location: 'Mylapore',   amount: 1320, mode: 'UPI',  partner: 'Arun',    overdue: false, inTransit: false, scheduled: '16:00' },
+  { name: 'Murugan S.',        location: 'Velachery',  amount: 1800, mode: 'Cash',          partner: 'Mohan',   overdue: true,  inTransit: false, scheduled: null },
+  { name: 'Priya Subramaniam', location: 'Anna Nagar', amount: 2950, mode: 'UPI',           partner: 'Mohan',   overdue: false, inTransit: true,  scheduled: null },
+  { name: 'Selvi Maran',       location: 'Tambaram',   amount: 3300, mode: 'Cash',          partner: 'Mohan',   overdue: false, inTransit: false, scheduled: '14:00' },
+  { name: 'Senthil Vel',       location: 'Tambaram',   amount: 1850, mode: 'Cash',          partner: 'Senthil', overdue: true,  inTransit: false, scheduled: null },
+  { name: 'Bhaskar Rao',       location: 'T. Nagar',   amount: 4200, mode: 'UPI',           partner: 'Senthil', overdue: false, inTransit: false, scheduled: '15:30' },
+  { name: 'Anand Pillai',      location: 'Mylapore',   amount: 1320, mode: 'UPI',           partner: 'Arun',    overdue: false, inTransit: false, scheduled: '16:00' },
+  { name: 'Deepa Natarajan',   location: 'Adyar',      amount: 5500, mode: 'Bank Transfer', partner: 'Mohan',   overdue: false, inTransit: false, scheduled: '13:00' },
+  { name: 'Vijay Shankar',     location: 'Porur',      amount: 8200, mode: 'NEFT',          partner: 'Arun',    overdue: false, inTransit: false, scheduled: '11:30' },
 ];
 
 const DONE = [
-  { name: 'Ravi Kumar',     location: 'T. Nagar',   amount: 2400, mode: 'UPI',  partner: 'Mohan',   time: '09:14 AM' },
-  { name: 'Lakshmi Devi',   location: 'Mylapore',   amount: 3250, mode: 'Cash', partner: 'Senthil', time: '10:02 AM' },
-  { name: 'Karthik Raja',   location: 'Velachery',  amount: 4800, mode: 'UPI',  partner: 'Senthil', time: '08:22 AM' },
-  { name: 'Kavitha Ravi',   location: 'T. Nagar',   amount: 1200, mode: 'UPI',  partner: 'Mohan',   time: '08:48 AM' },
-  { name: 'Meena Krishnan', location: 'Anna Nagar', amount: 1700, mode: 'Cash', partner: 'Arun',    time: '09:33 AM' },
-  { name: 'Rajalakshmi K.', location: 'Mylapore',   amount: 2100, mode: 'UPI',  partner: 'Senthil', time: '10:18 AM' },
+  { name: 'Ravi Kumar',     location: 'T. Nagar',   amount: 2400, mode: 'UPI',           partner: 'Mohan',   time: '09:14 AM' },
+  { name: 'Lakshmi Devi',   location: 'Mylapore',   amount: 3250, mode: 'Cash',          partner: 'Senthil', time: '10:02 AM' },
+  { name: 'Karthik Raja',   location: 'Velachery',  amount: 4800, mode: 'UPI',           partner: 'Senthil', time: '08:22 AM' },
+  { name: 'Kavitha Ravi',   location: 'T. Nagar',   amount: 1200, mode: 'UPI',           partner: 'Mohan',   time: '08:48 AM' },
+  { name: 'Meena Krishnan', location: 'Anna Nagar', amount: 1700, mode: 'Cash',          partner: 'Arun',    time: '09:33 AM' },
+  { name: 'Rajalakshmi K.', location: 'Mylapore',   amount: 2100, mode: 'UPI',           partner: 'Senthil', time: '10:18 AM' },
+  { name: 'Suresh Babu',    location: 'Adyar',      amount: 6400, mode: 'Bank Transfer', partner: 'Mohan',   time: '07:55 AM' },
+  { name: 'Nithya Devi',    location: 'Porur',      amount: 9800, mode: 'NEFT',          partner: 'Arun',    time: '08:10 AM' },
 ];
+
+const LIST_PAGE_SIZE = 5;
 
 export default function Collections() {
   const { tweaks } = useTweaks();
+  const dueP  = usePagination(DUE,  LIST_PAGE_SIZE);
+  const doneP = usePagination(DONE, LIST_PAGE_SIZE);
 
   return (
     <section id="screen-collections" className="active">
@@ -68,11 +77,10 @@ export default function Collections() {
             <span className="pill warn">9 awaiting</span>
           </div>
           <div className="col-list">
-            {DUE.map((c, i) => {
-              let badge = <span className="pill neutral">Pending</span>;
-              let sub   = c.scheduled ? `Scheduled · ${c.scheduled}` : 'Due now';
-              if (c.overdue)   { badge = <span className="pill danger">Overdue</span>;    sub = 'Auto-call sent'; }
-              if (c.inTransit) { badge = <span className="pill warn">In transit</span>;   sub = 'Visiting now'; }
+            {dueP.pageItems.map((c, i) => {
+              let sub = c.scheduled ? `Scheduled · ${c.scheduled}` : 'Due now';
+              if (c.overdue)   sub = 'Auto-call sent';
+              if (c.inTransit) sub = 'Visiting now';
               return (
                 <div key={i} className={`col-row ${c.overdue ? 'overdue' : ''}`}>
                   <div className="av">{initials(c.name)}</div>
@@ -81,11 +89,18 @@ export default function Collections() {
                     <div className="li-meta">{c.location} · {c.partner}</div>
                     <div className="partner">{sub}</div>
                   </div>
-                  <span className={`mode-pill ${c.mode.toLowerCase()}`}>{c.mode}</span>
+                  <span className={`mode-pill ${c.mode.toLowerCase().replace(' ', '-')}`}>{c.mode}</span>
                   <div className="li-amount">₹{fmtINR(c.amount)}</div>
                 </div>
               );
             })}
+            <Pagination
+              page={dueP.page}
+              totalPages={dueP.totalPages}
+              onPageChange={dueP.setPage}
+              totalItems={dueP.total}
+              pageSize={dueP.pageSize}
+            />
           </div>
           <div className="col-totals">
             <div className="col-total due">
@@ -109,7 +124,7 @@ export default function Collections() {
             <span className="pill success">92% efficiency</span>
           </div>
           <div className="col-list">
-            {DONE.map((c, i) => (
+            {doneP.pageItems.map((c, i) => (
               <div key={i} className="col-row">
                 <div className="av gold">{initials(c.name)}</div>
                 <div>
@@ -117,29 +132,43 @@ export default function Collections() {
                   <div className="li-meta">{c.location} · {c.partner}</div>
                   <div className="partner">{c.time}</div>
                 </div>
-                <span className={`mode-pill ${c.mode.toLowerCase()}`}>{c.mode}</span>
+                <span className={`mode-pill ${c.mode.toLowerCase().replace(' ', '-')}`}>{c.mode}</span>
                 <div className="li-amount" style={{ color: 'var(--success)' }}>+₹{fmtINR(c.amount)}</div>
               </div>
             ))}
+            <Pagination
+              page={doneP.page}
+              totalPages={doneP.totalPages}
+              onPageChange={doneP.setPage}
+              totalItems={doneP.total}
+              pageSize={doneP.pageSize}
+            />
           </div>
           <div className="col-totals">
             <div className="col-total collected">
               <div className="lbl">Total Collected</div>
-              <div className="val">₹1,84,720</div>
+              <div className="val">₹2,00,920</div>
             </div>
             <div className="col-total">
               <div className="lbl">Cash</div>
-              <div className="val" style={{ color: 'var(--accent)' }}>₹78,400</div>
+              <div className="val" style={{ color: 'var(--primary)' }}>₹49,500</div>
             </div>
             <div className="col-total">
               <div className="lbl">UPI</div>
-              <div className="val" style={{ color: 'var(--primary)' }}>₹1,06,320</div>
+              <div className="val" style={{ color: 'var(--violet)' }}>₹76,200</div>
+            </div>
+            <div className="col-total">
+              <div className="lbl">Bank Transfer</div>
+              <div className="val" style={{ color: 'var(--blue)' }}>₹38,800</div>
+            </div>
+            <div className="col-total">
+              <div className="lbl">NEFT</div>
+              <div className="val" style={{ color: 'var(--amber)' }}>₹36,420</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="foot-mark">Made in Chennai</div>
     </section>
   );
 }

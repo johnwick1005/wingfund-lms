@@ -43,7 +43,7 @@ export default function TweaksPanel() {
             <input
               type="color"
               className="twk-color"
-              value={tweaks.primaryColor}
+              value={tweaks.primaryColor || '#09443F'}
               onChange={e => setTweaks({ primaryColor: e.target.value })}
             />
           </div>
@@ -52,7 +52,7 @@ export default function TweaksPanel() {
             <input
               type="color"
               className="twk-color"
-              value={tweaks.accentColor}
+              value={tweaks.accentColor || '#2D3748'}
               onChange={e => setTweaks({ accentColor: e.target.value })}
             />
           </div>
