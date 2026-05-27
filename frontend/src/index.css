@@ -1608,3 +1608,199 @@ input, select, textarea { font-family: inherit; }
   font-weight: 600;
   user-select: none;
 }
+
+/* ─── Login page ─────────────────────────────────────────── */
+.login-root {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+/* ── Left banner (hero image) ── */
+.login-banner {
+  flex: 1;
+  min-width: 0;
+  background-color: #041F1C;
+  background-image: url("/login-banner.png");
+  background-size: cover;
+  background-position: left center;
+  background-repeat: no-repeat;
+}
+
+/* ── Right credentials ── */
+.login-right {
+  width: 520px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 56px;
+  background: var(--surface);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+}
+
+.login-card-logo {
+  margin-bottom: 28px;
+}
+.login-card-mark {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  background: var(--primary-soft);
+  display: grid; place-items: center;
+  color: var(--primary);
+}
+.login-card-mark svg { width: 28px; height: 28px; }
+
+.login-card-h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  margin: 0 0 6px;
+}
+.login-card-sub {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0 0 32px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.login-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.login-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.login-forgot {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12.5px;
+  color: var(--primary);
+  cursor: pointer;
+  font-family: inherit;
+}
+.login-forgot:hover { text-decoration: underline; }
+
+.login-input-wrap {
+  position: relative;
+}
+.login-input-wrap .login-input {
+  padding-right: 42px;
+}
+
+.login-input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.login-input::placeholder { color: var(--muted); opacity: 0.7; }
+.login-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.login-eye {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--muted);
+  display: grid; place-items: center;
+  border-radius: 6px;
+}
+.login-eye:hover { color: var(--text); }
+.login-eye svg { width: 16px; height: 16px; }
+
+.login-error {
+  font-size: 13px;
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-radius: 8px;
+  padding: 9px 12px;
+  margin-top: -4px;
+}
+
+.login-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px;
+  background: var(--primary);
+  color: var(--on-primary);
+  border: none;
+  border-radius: 10px;
+  font-size: 14.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.login-submit svg { width: 16px; height: 16px; }
+.login-submit:hover:not(:disabled) { opacity: 0.88; }
+.login-submit:active:not(:disabled) { transform: scale(0.985); }
+.login-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.login-spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: var(--on-primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+.login-demo-hint {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 20px;
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--surface-2);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.login-demo-hint svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+/* mobile: hide banner, stretch card */
+@media (max-width: 768px) {
+  .login-banner { display: none; }
+  .login-right { width: 100%; padding: 32px 24px; }
+}

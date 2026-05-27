@@ -10,8 +10,9 @@ import Customers from './screens/Customers.jsx';
 import Loans from './screens/Loans.jsx';
 import Collections from './screens/Collections.jsx';
 import Reports from './screens/Reports.jsx';
+import Login from './screens/Login.jsx';
 
-function AppShell() {
+function AppShell({ onLogout }) {
   const { tweaks } = useTweaks();
   const [screen,      setScreen]     = useState('dashboard');
   const [loanOpen,    setLoanOpen]   = useState(false);
@@ -34,7 +35,7 @@ function AppShell() {
       data-density={tweaks.density}
       data-dash-dense={String(tweaks.denseDashboard)}
     >
-      <Sidebar activeScreen={screen} onNavigate={setScreen} />
+      <Sidebar activeScreen={screen} onNavigate={setScreen} onLogout={onLogout} />
 
       <main className="main">
         <TopBar activeScreen={screen} />
@@ -56,9 +57,15 @@ function AppShell() {
 }
 
 export default function App() {
+  const [user, setUser] = useState(null);
+
+  if (!user) {
+    return <Login onLogin={setUser} />;
+  }
+
   return (
     <TweaksProvider>
-      <AppShell />
+      <AppShell onLogout={() => setUser(null)} />
     </TweaksProvider>
   );
 }
